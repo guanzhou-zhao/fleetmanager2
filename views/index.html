@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <script src="https://unpkg.com/axios@1.6.7/dist/axios.min.js"></script>
+    <script src="script.js"></script>
+</head>
+
+<body>
+
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #login-with-google {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+    <div id="login-with-google">
+        <div id="google_btn"></div>
+    </div>
+    <div id="main">
+
+    </div>
+    <div id="like_button_container"></div>
+    <!-- Load React. -->
+    <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+
+    <!-- Load our React component. -->
+    <script src="like_button.js"></script>
+    <script>
+        window.onload = function () { // get google token
+            let token = getCookie("token");
+            if (token && token != "") {
+                const user = decodeJwtResponse(token);
+                console.log('get user from cookie', user)
+
+                axios.post('/user', { token })
+                .then((res) => {
+                    console.log('POST /user')
+                    console.log('response from POST /user :', res)
+                }).catch((err) => {
+                    console.log(err)
+                })
+            } else {
+                google.accounts.id.initialize({
+                    client_id: '859003465245-0e19el21rsofb768u8icerklp5o8np6r.apps.googleusercontent.com',
+                    callback: handleCredentialResponse
+                });
+                const parent = document.getElementById('google_btn');
+                google.accounts.id.renderButton(parent, { theme: "filled_blue" });
+                google.accounts.id.prompt();
+            }
+        }
+    </script>
+    <script>
+
+        function handleCredentialResponse(response) {// got google token callback
+            setCookie('token', response.credential, 365)
+            // console.log('set token into cookie')
+            const user = decodeJwtResponse(response.credential)
+            axios.post('/user', { token: response.credential })
+                .then((res) => {
+                    console.log('POST /user')
+                    console.log('response from POST /user :', res)
+                }).catch((err) => {
+                    console.log(err)
+                })
+        }
+    </script>
+    <script>
+        // function signOut() {
+        //     const auth2 = gapi.auth2.getAuthInstance();
+        //     auth2.signOut().then(function () {
+        //         console.log('User signed out.');
+        //     });
+        // }
+        // function printUser() {
+        //     if (auth2.isSignedIn.get()) {
+        //         var profile = auth2.currentUser.get().getBasicProfile();
+        //         console.log('ID: ' + profile.getId());
+        //         console.log('Full Name: ' + profile.getName());
+        //         console.log('Given Name: ' + profile.getGivenName());
+        //         console.log('Family Name: ' + profile.getFamilyName());
+        //         console.log('Image URL: ' + profile.getImageUrl());
+        //         console.log('Email: ' + profile.getEmail());
+        //     }
+        // }
+    </script>
+</body>
+
+</html>

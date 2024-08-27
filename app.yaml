@@ -1,0 +1,4 @@
+runtime: nodejs20
+
+env_variables:
+  BUCKET_NAME: "example-gcs-bucket"
