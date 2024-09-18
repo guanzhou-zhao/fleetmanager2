@@ -7,7 +7,7 @@ const upload = multer() // for parsing multipart/form-data
 const Firestore = require('@google-cloud/firestore');
 const { OAuth2Client } = require('google-auth-library');
 const path = require('path');
-
+const db = new Firestore({ projectId: 'fleetmanager-406701' })
 
 var app = express();
 app.set('trust proxy', true);
@@ -43,9 +43,23 @@ app.get('/', async (req, res) => {
 function validateTokenAndGetPayload(token, req) {
 
 }
+app.post('/joinCompany', async (req, res) => {
+
+  
+  console.log('POST /user req.body', req.body)
+  const userRef = db.collection('users').doc(req.body.sub);
+
+  const userRes = await userRef.update({company: req.body.company});
+  console.log('user updated in fireStore:', userRes)
+
+  const documentSnapshot = await userRef.get();
+  userJson = documentSnapshot.data();
+  console.log('user updated', userJson)
+  res.json({user:userJson})
+})
 app.post('/user', async (req, res) => {
   console.log('POST /user req.body', req.body)
-  let payload;
+  let payload, userJson
 
   if (req.body && req.body.token) {
 
@@ -87,15 +101,28 @@ app.post('/user', async (req, res) => {
   }
   if (payload && 'sub' in payload) {
 
-    const db = new Firestore({ projectId: 'fleetmanager-406701' })
+
     const userRef = db.collection('users').doc(payload.sub);
 
     const userRes = await userRef.set(payload, { merge: true });
     console.log('user updated in fireStore:', userRes)
+
+    const documentSnapshot = await userRef.get();
+    userJson = documentSnapshot.data();
   }
 
+  let companies = []
+  let collectionSnapshot = await db.collection('companies').get()
+  collectionSnapshot.forEach(documentSnapshot => {
+    console.log(`Document found at path: ${documentSnapshot.ref.path}`);
+    companies.push(documentSnapshot.id)
+  });
+  console.log('companies', companies);
 
-  res.json(payload)
+  res.json({
+    user: userJson || payload,
+    companies
+  })
 })
 
 const PORT = process.env.PORT || 8443

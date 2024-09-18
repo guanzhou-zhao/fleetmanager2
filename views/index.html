@@ -10,7 +10,7 @@
     <script src="https://unpkg.com/axios@1.6.7/dist/axios.min.js"></script>
     <script src="script.js"></script>
     <script>
-        let fm_user
+        let fm_user, fm_companies
     </script>
 </head>
 
@@ -37,31 +37,26 @@
     <div id="main">
 
     </div>
-    <div id="like_button_container"></div>
+    <div id="root"></div>
     <!-- Load React. -->
     <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 
     <!-- Load our React component. -->
-    <script src="like_button.js"></script>
+    <script src="new_user.js"></script>
     <script>
         function promptGoogleLogin() {
             google.accounts.id.initialize({
-                    client_id: '859003465245-0e19el21rsofb768u8icerklp5o8np6r.apps.googleusercontent.com',
-                    callback: handleCredentialResponse
-                });
-                const parent = document.getElementById('google_btn');
-                google.accounts.id.renderButton(parent, { theme: "filled_blue" });
-                google.accounts.id.prompt();
+                client_id: '859003465245-0e19el21rsofb768u8icerklp5o8np6r.apps.googleusercontent.com',
+                callback: handleCredentialResponse
+            });
+            const parent = document.getElementById('google_btn');
+            google.accounts.id.renderButton(parent, { theme: "filled_blue" });
+            google.accounts.id.prompt();
         }
-        window.onload = function () { // get google token
-            let token = getCookie("token");
-            if (token && token != "") {
-                fm_user = decodeJwtResponse(token);
-                console.log('get user from cookie', fm_user)
-
-                axios.post('/user', { token })
+        function getUser(token) {
+            axios.post('/user', { token })
                 .then((res) => {
                     console.log('POST /user')
                     console.log('response from POST /user :', res)
@@ -69,14 +64,26 @@
                         promptGoogleLogin()
                     } else { // user is google authenticated
                         // show user name and company if already in company
-
+                        // res.data {user, companies}
+                        renderRoot(res.data)
                     }
                 }).catch((err) => {
                     console.log(err)
                 })
+        }
+        let companies
+        window.onload = function () { // get google token
+            let token = getCookie("token");
+            if (token && token != "") {
+                fm_user = decodeJwtResponse(token);
+                console.log('get user from cookie', fm_user)
+
+                getUser(token)
+
             } else {
                 promptGoogleLogin()
             }
+          
         }
     </script>
     <script>
@@ -86,7 +93,7 @@
             // decode user from token returned from google
             fm_user = decodeJwtResponse(response.credential)
             // get user infomation from db 
-
+            getUser(response.credential)
             // and show user name and company if already in company
         }
     </script>
