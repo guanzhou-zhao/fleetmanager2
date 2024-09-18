@@ -85,10 +85,17 @@ app.post('/user', async (req, res) => {
     // no token in cookie
     console.log('no token in req.body')
   }
+  if (payload && 'sub' in payload) {
+
+    const db = new Firestore({ projectId: 'fleetmanager-406701' })
+    const userRef = db.collection('users').doc(payload.sub);
+
+    const userRes = await userRef.set(payload, { merge: true });
+    console.log('user updated in fireStore:', userRes)
+  }
 
 
-
-  res.json({ ok: 1 })
+  res.json(payload)
 })
 
 const PORT = process.env.PORT || 8443

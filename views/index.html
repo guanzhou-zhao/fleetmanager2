@@ -9,6 +9,9 @@
     <script src="https://accounts.google.com/gsi/client" async></script>
     <script src="https://unpkg.com/axios@1.6.7/dist/axios.min.js"></script>
     <script src="script.js"></script>
+    <script>
+        let fm_user
+    </script>
 </head>
 
 <body>
@@ -43,43 +46,48 @@
     <!-- Load our React component. -->
     <script src="like_button.js"></script>
     <script>
-        window.onload = function () { // get google token
-            let token = getCookie("token");
-            if (token && token != "") {
-                const user = decodeJwtResponse(token);
-                console.log('get user from cookie', user)
-
-                axios.post('/user', { token })
-                .then((res) => {
-                    console.log('POST /user')
-                    console.log('response from POST /user :', res)
-                }).catch((err) => {
-                    console.log(err)
-                })
-            } else {
-                google.accounts.id.initialize({
+        function promptGoogleLogin() {
+            google.accounts.id.initialize({
                     client_id: '859003465245-0e19el21rsofb768u8icerklp5o8np6r.apps.googleusercontent.com',
                     callback: handleCredentialResponse
                 });
                 const parent = document.getElementById('google_btn');
                 google.accounts.id.renderButton(parent, { theme: "filled_blue" });
                 google.accounts.id.prompt();
+        }
+        window.onload = function () { // get google token
+            let token = getCookie("token");
+            if (token && token != "") {
+                fm_user = decodeJwtResponse(token);
+                console.log('get user from cookie', fm_user)
+
+                axios.post('/user', { token })
+                .then((res) => {
+                    console.log('POST /user')
+                    console.log('response from POST /user :', res)
+                    if (res.data && 'error' in res.data) {
+                        promptGoogleLogin()
+                    } else { // user is google authenticated
+                        // show user name and company if already in company
+
+                    }
+                }).catch((err) => {
+                    console.log(err)
+                })
+            } else {
+                promptGoogleLogin()
             }
         }
     </script>
     <script>
 
-        function handleCredentialResponse(response) {// got google token callback
+        function handleCredentialResponse(response) {// got google token 
             setCookie('token', response.credential, 365)
-            // console.log('set token into cookie')
-            const user = decodeJwtResponse(response.credential)
-            axios.post('/user', { token: response.credential })
-                .then((res) => {
-                    console.log('POST /user')
-                    console.log('response from POST /user :', res)
-                }).catch((err) => {
-                    console.log(err)
-                })
+            // decode user from token returned from google
+            fm_user = decodeJwtResponse(response.credential)
+            // get user infomation from db 
+
+            // and show user name and company if already in company
         }
     </script>
     <script>
