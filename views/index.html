@@ -58,8 +58,6 @@
         function getUser(token) {
             axios.post('/user', { token })
                 .then((res) => {
-                    console.log('POST /user')
-                    console.log('response from POST /user :', res)
                     if (res.data.user && 'error' in res.data.user) {
                         promptGoogleLogin()
                     } else {
@@ -78,8 +76,7 @@
         window.onload = function () { // get google token
             let token = getCookie("token");
             if (token && token != "") {
-                fm_user = decodeJwtResponse(token);
-                console.log('get user from cookie', fm_user)
+                // fm_user = decodeJwtResponse(token);
 
                 getUser(token)
 
@@ -94,7 +91,7 @@
         function handleCredentialResponse(response) {// got google token 
             setCookie('token', response.credential, 365)
             // decode user from token returned from google
-            fm_user = decodeJwtResponse(response.credential)
+            // fm_user = decodeJwtResponse(response.credential)
             // get user infomation from db 
             getUser(response.credential)
             // and show user name and company if already in company

@@ -8,7 +8,22 @@ const Firestore = require('@google-cloud/firestore');
 const { OAuth2Client } = require('google-auth-library');
 const path = require('path');
 const db = new Firestore({ projectId: 'fleetmanager-406701' })
-
+const cash = {
+  async getCompanies() {
+    if ('companies' in this) {
+      return this.companies;
+    } else {
+      let companies = []
+      let collectionSnapshot = await db.collection('companies').get()
+      collectionSnapshot.forEach(documentSnapshot => {
+        console.log(`Document found at path: ${documentSnapshot.ref.path}`);
+        companies.push({ id: documentSnapshot.id, ...documentSnapshot.data() })
+      });
+      this.companies = companies
+      return companies
+    }
+  }
+}
 var app = express();
 app.set('trust proxy', true);
 const helmetOpts = {
@@ -34,94 +49,92 @@ app.use(cookieParser())
 
 
 app.use(express.static('public'))
-
-app.get('/', async (req, res) => {
-
-
-  res.sendFile(path.join(__dirname + '/views/index.html'));
-})
-function validateTokenAndGetPayload(token, req) {
-
-}
-app.post('/joinCompany', async (req, res) => {
-
-  
-  console.log('POST /user req.body', req.body)
-  const userRef = db.collection('users').doc(req.body.sub);
-
-  const userRes = await userRef.update({company: req.body.company});
-  console.log('user updated in fireStore:', userRes)
-
-  const documentSnapshot = await userRef.get();
-  userJson = documentSnapshot.data();
-  console.log('user updated', userJson)
-  res.json({user:userJson})
-})
-app.post('/user', async (req, res) => {
-  console.log('POST /user req.body', req.body)
-  let payload, userJson
-
-  if (req.body && req.body.token) {
+//validate user and set user in req
+app.use(async (req, res, next) => {
+  let hasError = false, errorString, user = { error: 'authenticate error' }
+  if (req.cookies && req.cookies.token) {
 
     const client = new OAuth2Client();
 
-    let hasError = false, errorString, ticket
+    let ticket
     try {
       ticket = await client.verifyIdToken({
-        idToken: req.body.token,
+        idToken: req.cookies.token,
         audience: '859003465245-0e19el21rsofb768u8icerklp5o8np6r.apps.googleusercontent.com',  // Specify the CLIENT_ID of the app that accesses the backend
         // Or, if multiple clients access the backend:
         //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
         maxExpiry: 3600 * 24 * 300,
       })
     } catch (error) {
-      console.log(typeof error, '--', error.toString())
       hasError = true
       errorString = error.toString()
       if (errorString.indexOf('Token used too late') > -1) { // token used too late error
         let matches = errorString.match(/\{.+\}/g)
 
         if (matches && matches.length > 0) {
-          payload = JSON.parse(matches[0])
-          console.log('payload:', payload)
+          user = JSON.parse(matches[0])
         }
-      } else { // other error indicates invalid token
-        payload = { error: 'authenticate error' }
       }
     }
     if (!hasError) {
-      payload = ticket.getPayload();
-      // If the request specified a Google Workspace domain:
-      // const domain = payload['hd'];        
+      user = ticket.getPayload();
     }
-    console.log('token payload:', payload)
+  }
+  if ('error' in user) {
+    res.json({ user })
   } else {
-    // no token in cookie
-    console.log('no token in req.body')
+    req.fm_user = user
+    next()
   }
-  if (payload && 'sub' in payload) {
+})
+app.get('/', async (req, res) => {
 
 
-    const userRef = db.collection('users').doc(payload.sub);
+  res.sendFile(path.join(__dirname + '/views/index.html'));
+})
+app.get('/boss', async (req, res) => {
+  let companies = cash.getCompanies();
 
-    const userRes = await userRef.set(payload, { merge: true });
-    console.log('user updated in fireStore:', userRes)
+  res.sendFile(path.join(__dirname + '/views/boss.html'))
+})
+function validateTokenAndGetPayload(token, req) {
 
-    const documentSnapshot = await userRef.get();
-    userJson = documentSnapshot.data();
+}
+app.post('/joinCompany', async (req, res) => {
+
+
+  const userRef = db.collection('users').doc(req.fm_user.sub);
+
+  const userRes = await userRef.update({ company: req.body.company });
+
+  const documentSnapshot = await userRef.get();
+  userJson = documentSnapshot.data();
+  res.json({ user: userJson })
+})
+app.post('/user', async (req, res) => {
+
+  let user = req.fm_user, userJson
+  let companies = await cash.getCompanies();
+  let companyIds = companies.map(c => c.id)
+  let isBoss = false
+  for (company of companies) {
+    if (user.sub == company.bossId) {
+      isBoss = true
+      break
+    }
   }
+  user.isBoss = isBoss
+  const userRef = db.collection('users').doc(user.sub);
 
-  let companies = []
-  let collectionSnapshot = await db.collection('companies').get()
-  collectionSnapshot.forEach(documentSnapshot => {
-    console.log(`Document found at path: ${documentSnapshot.ref.path}`);
-    companies.push(documentSnapshot.id)
-  });
-  console.log('companies', companies);
+  const userRes = await userRef.set(user, { merge: true });
+
+  const documentSnapshot = await userRef.get();
+  userJson = documentSnapshot.data();
+
 
   res.json({
-    user: userJson || payload,
-    companies
+    user: userJson,
+    companies: companyIds
   })
 })
 

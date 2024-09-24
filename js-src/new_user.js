@@ -60,8 +60,6 @@ function TextInputControl({ user, companies, setUser }) {
     )
 }
 function InstructionPage({ user:userProp, companies }) {
-    console.log('InstructionPage user : ', userProp)
-    console.log('company in user: ', 'company' in userProp)
     let [user, setUser] = React.useState(userProp)
     return (
         <div>
@@ -71,9 +69,18 @@ function InstructionPage({ user:userProp, companies }) {
         </div>
     )
 }
+function BossPage() {
+    return (
+        <h1>only for boss</h1>
+    )
+}
+function App({data}) {
+    let isBoss = data.user.isBoss
 
+    return isBoss ? <BossPage /> : <InstructionPage user={data.user} companies={data.companies} />
+}
 function renderRoot(data) {
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<InstructionPage user={data.user} companies={data.companies} />);
+    root.render(<App data={data} />);
 }
