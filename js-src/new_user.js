@@ -76,8 +76,14 @@ function BossPage() {
 }
 function App({data}) {
     let isBoss = data.user.isBoss
+    let [showManagePage, setPage] = useState(isBoss)
 
-    return isBoss ? <BossPage /> : <InstructionPage user={data.user} companies={data.companies} />
+    return (
+        <React.Fragment>
+        <button onClick={()=>setPage(!showManagePage)}>{showManagePage ? 'as Driver' : 'Manage'}</button>
+        {showManagePage ? <BossPage /> : <InstructionPage user={data.user} companies={data.companies} />}
+        </React.Fragment>
+    )
 }
 function renderRoot(data) {
 
