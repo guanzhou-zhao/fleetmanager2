@@ -60,9 +60,12 @@
                 .then((res) => {
                     console.log('POST /user')
                     console.log('response from POST /user :', res)
-                    if (res.data && 'error' in res.data) {
+                    if (res.data.user && 'error' in res.data.user) {
                         promptGoogleLogin()
-                    } else { // user is google authenticated
+                    } else {
+                        // hide google login button 
+                        document.getElementById('google_btn').innerHTML=""
+                        // user is google authenticated
                         // show user name and company if already in company
                         // res.data {user, companies}
                         renderRoot(res.data)

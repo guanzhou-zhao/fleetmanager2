@@ -131,3 +131,4 @@ dist
 
 # https cert files
 sslcert/
+public/new_user.js

@@ -59,10 +59,10 @@ function TextInputControl({ user, companies, setUser }) {
         </div>
     )
 }
-function InstructionPage({ user, companies }) {
-    console.log('InstructionPage user : ', user)
-    console.log('company in user: ', 'company' in user)
-    let [user, setUser] = React.useState(user)
+function InstructionPage({ user:userProp, companies }) {
+    console.log('InstructionPage user : ', userProp)
+    console.log('company in user: ', 'company' in userProp)
+    let [user, setUser] = React.useState(userProp)
     return (
         <div>
             <GreetingHeader user={user} />
