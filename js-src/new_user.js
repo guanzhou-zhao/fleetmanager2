@@ -1,4 +1,5 @@
 // import {useState} from 'react'
+
 const { useState } = React
 function GreetingHeader({ user }) {
     let companyInHeader = ('company' in user) ? <span>from {user.company.name}</span> : ''
@@ -32,7 +33,7 @@ function TextInputControl({ user, companies, setUser }) {
         if (companies.includes(inputText)) {
             setIsWrong(false)
             //apply to join the company
-            axios.post('/joinCompany', { sub:user.sub, company: {name: inputText, status:0}})
+            axios.post('/joinCompany', { sub: user.sub, company: { name: inputText, status: 0 } })
                 .then((res) => {
                     console.log('post /joinCompany')
                     console.log('response from POST /joinCompany :', res)
@@ -53,13 +54,13 @@ function TextInputControl({ user, companies, setUser }) {
             <input
                 type="text"
                 value={inputText} placeholder="Company Code..."
-                onChange={(e) => {setInputText(e.target.value)}} />
+                onChange={(e) => { setInputText(e.target.value) }} />
             <button onClick={handleClick}>Submit</button>
             {isWrongCompanyCode && <p>Company Code not found</p>}
         </div>
     )
 }
-function InstructionPage({ user:userProp, companies }) {
+function InstructionPage({ user: userProp, companies }) {
     let [user, setUser] = React.useState(userProp)
     return (
         <div>
@@ -70,18 +71,52 @@ function InstructionPage({ user:userProp, companies }) {
     )
 }
 function BossPage() {
+
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await axios.get('/users'); // Replace with your API endpoint
+                if ('error' in response.data) {
+                    setError(response.data.error)
+                } else {
+                    setUsers(response.data);
+                }
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUsers();
+    }, []); // Empty dependency array means this runs once on mount
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
+
     return (
-        <h1>only for boss</h1>
-    )
+        <div>
+            <h1>Users</h1>
+            <ul>
+                {users.map(item => (
+                    <li key={item.sub}>{item.name}</li> // Adjust according to your data structure
+                ))}
+            </ul>
+        </div>
+    );
 }
-function App({data}) {
+function App({ data }) {
     let isBoss = data.user.isBoss
     let [showManagePage, setPage] = useState(isBoss)
 
     return (
         <React.Fragment>
-        <button onClick={()=>setPage(!showManagePage)}>{showManagePage ? 'as Driver' : 'Manage'}</button>
-        {showManagePage ? <BossPage /> : <InstructionPage user={data.user} companies={data.companies} />}
+            <button onClick={() => setPage(!showManagePage)}>{showManagePage ? 'as Driver' : 'Manage'}</button>
+            {showManagePage ? <BossPage /> : <InstructionPage user={data.user} companies={data.companies} />}
         </React.Fragment>
     )
 }

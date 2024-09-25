@@ -16,7 +16,6 @@ const cash = {
       let companies = []
       let collectionSnapshot = await db.collection('companies').get()
       collectionSnapshot.forEach(documentSnapshot => {
-        console.log(`Document found at path: ${documentSnapshot.ref.path}`);
         companies.push({ id: documentSnapshot.id, ...documentSnapshot.data() })
       });
       this.companies = companies
@@ -110,6 +109,22 @@ app.post('/joinCompany', async (req, res) => {
   const documentSnapshot = await userRef.get();
   userJson = documentSnapshot.data();
   res.json({ user: userJson })
+})
+app.get('/users', async (req, res) => {
+  let users=[]
+  //verify if current user is boss
+  if (!req.fm_user.isBoss) {
+    res.json({ error: 'you are not a boss of a company' })
+  } else {
+    // get users from db
+    const usersSnapshot = await db.collection('users').get()
+    usersSnapshot.forEach((u)=> {
+      users.push(u.data())
+    })
+    res.json(users)
+  }
+
+  // send users back
 })
 app.post('/user', async (req, res) => {
 
