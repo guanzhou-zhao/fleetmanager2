@@ -1,6 +1,6 @@
-// import {useState} from 'react'
+// import {useState, useEffect, Fragment} from 'react'
 
-const { useState } = React
+const {useState, useEffect, Fragment} = React
 function GreetingHeader({ user }) {
     let companyInHeader = ('company' in user) ? <span>from {user.company.name}</span> : ''
     return (
@@ -61,7 +61,7 @@ function TextInputControl({ user, companies, setUser }) {
     )
 }
 function InstructionPage({ user: userProp, companies }) {
-    let [user, setUser] = React.useState(userProp)
+    let [user, setUser] = useState(userProp)
     return (
         <div>
             <GreetingHeader user={user} />
@@ -114,10 +114,10 @@ function App({ data }) {
     let [showManagePage, setPage] = useState(isBoss)
 
     return (
-        <React.Fragment>
+        <Fragment>
             <button onClick={() => setPage(!showManagePage)}>{showManagePage ? 'as Driver' : 'Manage'}</button>
             {showManagePage ? <BossPage /> : <InstructionPage user={data.user} companies={data.companies} />}
-        </React.Fragment>
+        </Fragment>
     )
 }
 function renderRoot(data) {
