@@ -82,6 +82,15 @@ app.use(async (req, res, next) => {
   if ('error' in user) {
     res.json({ user })
   } else {
+    let companies = await cash.getCompanies();
+    let isBoss = false
+    for (company of companies) {
+      if (user.sub == company.bossId) {
+        isBoss = true
+        break
+      }
+    }
+    user.isBoss = isBoss
     req.fm_user = user
     next()
   }
@@ -131,14 +140,7 @@ app.post('/user', async (req, res) => {
   let user = req.fm_user, userJson
   let companies = await cash.getCompanies();
   let companyIds = companies.map(c => c.id)
-  let isBoss = false
-  for (company of companies) {
-    if (user.sub == company.bossId) {
-      isBoss = true
-      break
-    }
-  }
-  user.isBoss = isBoss
+
   const userRef = db.collection('users').doc(user.sub);
 
   const userRes = await userRef.set(user, { merge: true });
