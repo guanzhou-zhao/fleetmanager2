@@ -70,11 +70,33 @@ function InstructionPage({ user: userProp, companies }) {
         </div>
     )
 }
+function AddVehicle({setIsAdding}) {
+    return <div>adding vehicle <button onClick={()=>setIsAdding(false)}>Cancel</button></div>
+}
+function EditVehicle() {
+    return <div>Editting vehicle</div>
+}
+function ListVehicle() {
+    return <div>the list of vehicles</div>
+}
+function Vehicles() {
+    const [isEditting, setIsEditting] = useState(false)
+    const [isAdding, setIsAdding] = useState(false)
+
+    return (
+        <div>
+            <button onClick={()=>setIsAdding(true)}>Add Vehicle</button>
+            {isAdding && <AddVehicle setIsAdding={setIsAdding}/>}
+            <ListVehicle />
+        </div>
+    )
+}
 function BossPage() {
 
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [activePage, setActivePage] = useState('vehicles')
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -119,12 +141,16 @@ function BossPage() {
     }
     return (
         <div>
-            <h1>Users</h1>
-            <ul>
+            <h4 onClick={()=>setActivePage('users')}>Users</h4>
+            <h4 onClick={()=>setActivePage('vehicles')}>Vehicles</h4>
+            {activePage=='users' && <ul>
                 {users.map(item => (
                     <li key={item.sub}>{item.name} {item.email} <button onClick={toggleApprove(item)}>{item.company.status==0?'approve':'remove'}</button></li> // Adjust according to your data structure
                 ))}
-            </ul>
+            </ul>}
+            {activePage=='vehicles'&& (
+                <Vehicles />
+            )}
         </div>
     );
 }
