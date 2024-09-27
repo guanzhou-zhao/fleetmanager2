@@ -84,13 +84,16 @@ app.use(async (req, res, next) => {
   } else {
     let companies = await cash.getCompanies();
     let isBoss = false
+    let bossOfCompanyId
     for (company of companies) {
       if (user.sub == company.bossId) {
         isBoss = true
+        bossOfCompanyId = company.id
         break
       }
     }
     user.isBoss = isBoss
+    user.bossOfCompanyId = bossOfCompanyId
     req.fm_user = user
     next()
   }
@@ -120,20 +123,47 @@ app.post('/joinCompany', async (req, res) => {
   res.json({ user: userJson })
 })
 app.get('/users', async (req, res) => {
-  let users=[]
+  let users = []
   //verify if current user is boss
   if (!req.fm_user.isBoss) {
     res.json({ error: 'you are not a boss of a company' })
   } else {
     // get users from db
-    const usersSnapshot = await db.collection('users').get()
-    usersSnapshot.forEach((u)=> {
+    const usersSnapshot = await db.collection('users').where('company.name', '==', req.fm_user.bossOfCompanyId).get()
+    usersSnapshot.forEach((u) => {
       users.push(u.data())
     })
     res.json(users)
   }
 
   // send users back
+})
+app.post('/setJoinCompanyStatus', async (req, res) => {
+  // req.body {sub, data: {status: 1|0}}
+  console.log('post /setJoinCompanyStatus req.body ', req.body)
+  if (!req.fm_user.isBoss) {
+    res.json({error: 'you are not boss'})
+
+  } else {// the user, who is requesting, is boss
+
+    const userRef = db.collection('users').doc(req.body.sub);
+    let userSnapshot = await userRef.get()
+    let user = userSnapshot.data()
+  
+    if (req.fm_user.bossOfCompanyId != user.company.name) {
+      res.json({error: 'you are not the boss of the staff'})
+    } else { // the user, who is requesing, is the boss of the user being updated
+
+      await userRef.set(req.body.data, { merge: true });
+      userSnapshot = await userRef.get()
+      res.json({user: userSnapshot.data()})
+    }
+  
+  }
+
+
+
+
 })
 app.post('/user', async (req, res) => {
 

@@ -98,12 +98,31 @@ function BossPage() {
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
+    function toggleApprove(item) {
+        return function() {
+            console.log(item)
+            axios.post('/setJoinCompanyStatus', {sub: item.sub, data:{company: {status: item.company.status==0? 1:0}}})
+            .then((res) => {
+                if('error' in res.data) {
+                    setError(res.data.error)
+                } else {
+                    const resUser = res.data.user
+                    const newUsers = users.map((u) => u.sub==resUser.sub ? resUser : u)
+                    console.log(newUsers)
+                    setUsers(newUsers)
+                }
+            })
+            .catch((err) => {
+                setError(err)
+            })
+        }
+    }
     return (
         <div>
             <h1>Users</h1>
             <ul>
                 {users.map(item => (
-                    <li key={item.sub}>{item.name}</li> // Adjust according to your data structure
+                    <li key={item.sub}>{item.name} {item.email} <button onClick={toggleApprove(item)}>{item.company.status==0?'approve':'remove'}</button></li> // Adjust according to your data structure
                 ))}
             </ul>
         </div>
@@ -115,7 +134,7 @@ function App({ data }) {
 
     return (
         <Fragment>
-            <button onClick={() => setPage(!showManagePage)}>{showManagePage ? 'as Driver' : 'Manage'}</button>
+            <button onClick={() => setPage(!showManagePage)}>{showManagePage ? 'login as Driver' : 'Manage fleet'}</button>
             {showManagePage ? <BossPage /> : <InstructionPage user={data.user} companies={data.companies} />}
         </Fragment>
     )
