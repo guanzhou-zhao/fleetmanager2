@@ -21,6 +21,11 @@ const cash = {
       this.companies = companies
       return companies
     }
+  },
+  async getVehicles() {
+    const vehiclesSnapshot = await db.collection('vehicles').get()
+    const vehiclesIds = vehiclesSnapshot.docs.map(v=>v.id)
+    return vehiclesIds
   }
 }
 var app = express();
@@ -142,27 +147,54 @@ app.post('/setJoinCompanyStatus', async (req, res) => {
   // req.body {sub, data: {status: 1|0}}
   console.log('post /setJoinCompanyStatus req.body ', req.body)
   if (!req.fm_user.isBoss) {
-    res.json({error: 'you are not boss'})
+    res.json({ error: 'you are not boss' })
 
   } else {// the user, who is requesting, is boss
 
     const userRef = db.collection('users').doc(req.body.sub);
     let userSnapshot = await userRef.get()
     let user = userSnapshot.data()
-  
+
     if (req.fm_user.bossOfCompanyId != user.company.name) {
-      res.json({error: 'you are not the boss of the staff'})
+      res.json({ error: 'you are not the boss of the staff' })
     } else { // the user, who is requesing, is the boss of the user being updated
 
       await userRef.set(req.body.data, { merge: true });
       userSnapshot = await userRef.get()
-      res.json({user: userSnapshot.data()})
+      res.json({ user: userSnapshot.data() })
     }
-  
+
   }
+})
+app.get('/vehicles', async (req, res) => {
 
+  let companyId
+  if ('bossOfCompanyId' in req.fm_user) {
+    companyId = req.fm_user.bossOfCompanyId
+  } else if ('company' in req.fm_user){
+    companyId = req.fm_user.company.name
+  } else {
+    res.json({error: 'user does not have a company'})
+    return
+  }
+  
+  const vehiclesSnapshot = await db.collection('vehicles').where('company', '==', companyId).get()
+  const vehicles = vehiclesSnapshot.docs.map(v=>v.data())
+  res.json(vehicles)
+})
+app.post('/vehicle', async (req, res) => {
+  const vehicles = await cash.getVehicles();
+  if (vehicles.includes(req.body.id)) {
+    res.json({error: "vehicle already exists!"})
+    return
+  }
+  const vehicleRef = db.collection('vehicles').doc(req.body.id);
 
+  await vehicleRef.set({name: req.body.id, company: req.fm_user.bossOfCompanyId}, { merge: true });
 
+  const snapshot = await vehicleRef.get()
+
+  res.json({newVehicle: snapshot.data()})
 
 })
 app.post('/user', async (req, res) => {
