@@ -1,6 +1,6 @@
 // import {useState, useEffect, Fragment} from 'react'
 
-const {useState, useEffect, Fragment} = React
+const { useState, useEffect, Fragment } = React
 function GreetingHeader({ user }) {
     let companyInHeader = ('company' in user) ? <span>from {user.company.name}</span> : ''
     return (
@@ -70,24 +70,97 @@ function InstructionPage({ user: userProp, companies }) {
         </div>
     )
 }
-function AddVehicle({setIsAdding}) {
-    return <div>adding vehicle <button onClick={()=>setIsAdding(false)}>Cancel</button></div>
+function AddVehicle({ setIsAdding, vehicles }) {
+    const [id, setId] = useState('')
+    const [isAllowed, setIsAllowed] = useState(true)
+    const [error, setError] = useState(null)
+    function handleSubmit (e) {
+        e.preventDefault();
+        // You can handle form submission here, e.g., send data to an API or log it
+        axios.post('/vehicle', { id: id })
+            .then((res) => {
+                if ('error' in res.data) {
+                    setError(res.data.error)
+                    console.log('post /vehicle state error', error)
+                }
+                console.log('post /vehicle ', res.data)
+            })
+            .catch((err) => {
+                setError(err)
+            })
+
+        // Reset form after submission
+        setId('')
+        // setIsAdding(false)
+    };
+    if(error) return <button onClick={ ()=> {setError(null)}}>{ error }</button>
+    return <div>
+        <button onClick={() => setIsAdding(false)}>Cancel</button>
+        <form onSubmit={handleSubmit}>
+            <div>
+                <label>Registration Number:</label>
+                <input
+                    type="text"
+                    name="id"
+                    value={id}
+                    onChange={(e) => {setId(e.target.value); setIsAllowed(!vehicles.map(v=>v).includes(e.target.value))}}
+                    required
+                />{!isAllowed && <i>number used!</i>}
+            </div>
+            <button type="submit" disabled={!isAllowed}>Submit</button>
+        </form>
+    </div>
 }
 function EditVehicle() {
     return <div>Editting vehicle</div>
 }
-function ListVehicle() {
-    return <div>the list of vehicles</div>
+function ListVehicle({ vehicles }) {
+    return <div><h2>Vehicle List</h2>
+        {vehicles.length === 0 ? (
+            <p>No vehicles added yet.</p>
+        ) : (
+            <ul>
+                {vehicles.map((vehicle) => (
+                    <li key={vehicle.name}>
+                        {vehicle.name}
+                        <button onClick={() => handleEdit(vehicle)}>Edit</button>
+                    </li>
+                ))}
+            </ul>
+        )}</div>
 }
 function Vehicles() {
     const [isEditting, setIsEditting] = useState(false)
     const [isAdding, setIsAdding] = useState(false)
+    const [vehicles, setVehicles] = useState([])
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
+    useEffect(() => {
+        const fetchVehicles = async () => {
+            try {
+                const response = await axios.get('/vehicles'); // Replace with your API endpoint
+                if ('error' in response.data) {
+                    setError(response.data.error)
+                } else {
+                    setVehicles(response.data);
+                }
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchVehicles();
+    }, []); // Empty dependency array means this runs once on mount
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
     return (
         <div>
-            <button onClick={()=>setIsAdding(true)}>Add Vehicle</button>
-            {isAdding && <AddVehicle setIsAdding={setIsAdding}/>}
-            <ListVehicle />
+            {!isAdding && <button onClick={() => setIsAdding(true)}>Add Vehicle</button>}
+            {isAdding && <AddVehicle setIsAdding={setIsAdding} vehicles={vehicles} />}
+            <ListVehicle vehicles={vehicles} />
         </div>
     )
 }
@@ -121,34 +194,34 @@ function BossPage() {
     if (error) return <div>Error: {error}</div>;
 
     function toggleApprove(item) {
-        return function() {
+        return function () {
             console.log(item)
-            axios.post('/setJoinCompanyStatus', {sub: item.sub, data:{company: {status: item.company.status==0? 1:0}}})
-            .then((res) => {
-                if('error' in res.data) {
-                    setError(res.data.error)
-                } else {
-                    const resUser = res.data.user
-                    const newUsers = users.map((u) => u.sub==resUser.sub ? resUser : u)
-                    console.log(newUsers)
-                    setUsers(newUsers)
-                }
-            })
-            .catch((err) => {
-                setError(err)
-            })
+            axios.post('/setJoinCompanyStatus', { sub: item.sub, data: { company: { status: item.company.status == 0 ? 1 : 0 } } })
+                .then((res) => {
+                    if ('error' in res.data) {
+                        setError(res.data.error)
+                    } else {
+                        const resUser = res.data.user
+                        const newUsers = users.map((u) => u.sub == resUser.sub ? resUser : u)
+                        console.log(newUsers)
+                        setUsers(newUsers)
+                    }
+                })
+                .catch((err) => {
+                    setError(err)
+                })
         }
     }
     return (
         <div>
-            <h4 onClick={()=>setActivePage('users')}>Users</h4>
-            <h4 onClick={()=>setActivePage('vehicles')}>Vehicles</h4>
-            {activePage=='users' && <ul>
+            <h4 onClick={() => setActivePage('users')}>Users</h4>
+            <h4 onClick={() => setActivePage('vehicles')}>Vehicles</h4>
+            {activePage == 'users' && <ul>
                 {users.map(item => (
-                    <li key={item.sub}>{item.name} {item.email} <button onClick={toggleApprove(item)}>{item.company.status==0?'approve':'remove'}</button></li> // Adjust according to your data structure
+                    <li key={item.sub}>{item.name} {item.email} <button onClick={toggleApprove(item)}>{item.company.status == 0 ? 'approve' : 'remove'}</button></li> // Adjust according to your data structure
                 ))}
             </ul>}
-            {activePage=='vehicles'&& (
+            {activePage == 'vehicles' && (
                 <Vehicles />
             )}
         </div>
