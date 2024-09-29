@@ -70,20 +70,22 @@ function InstructionPage({ user: userProp, companies }) {
         </div>
     )
 }
-function AddVehicle({ setIsAdding, vehicles }) {
+function AddVehicle({ setIsAdding, vehicles, setVehicles }) {
     const [id, setId] = useState('')
-    const [isAllowed, setIsAllowed] = useState(true)
     const [error, setError] = useState(null)
-    function handleSubmit (e) {
+    function handleSubmit(e) {
         e.preventDefault();
         // You can handle form submission here, e.g., send data to an API or log it
         axios.post('/vehicle', { id: id })
             .then((res) => {
                 if ('error' in res.data) {
                     setError(res.data.error)
-                    console.log('post /vehicle state error', error)
+                    setId('')
+                } else {
+                    vehicles.unshift(res.data)
+                    setVehicles(vehicles)
+                    setIsAdding(false)
                 }
-                console.log('post /vehicle ', res.data)
             })
             .catch((err) => {
                 setError(err)
@@ -93,7 +95,11 @@ function AddVehicle({ setIsAdding, vehicles }) {
         setId('')
         // setIsAdding(false)
     };
-    if(error) return <button onClick={ ()=> {setError(null)}}>{ error }</button>
+    function handleChange(e) {
+        setId(e.target.value.toUpperCase());
+        if (vehicles.map(v => v.name.toUpperCase()).includes(e.target.value.toUpperCase())) { setError('number has been used') }
+        else { setError(null) }
+    }
     return <div>
         <button onClick={() => setIsAdding(false)}>Cancel</button>
         <form onSubmit={handleSubmit}>
@@ -103,11 +109,11 @@ function AddVehicle({ setIsAdding, vehicles }) {
                     type="text"
                     name="id"
                     value={id}
-                    onChange={(e) => {setId(e.target.value); setIsAllowed(!vehicles.map(v=>v).includes(e.target.value))}}
+                    onChange={handleChange}
                     required
-                />{!isAllowed && <i>number used!</i>}
+                />{error && <div>number used!</div>}
             </div>
-            <button type="submit" disabled={!isAllowed}>Submit</button>
+            <button type="submit" disabled={vehicles.map(v => v.name.toUpperCase()).includes(id)}>Submit</button>
         </form>
     </div>
 }
@@ -159,7 +165,7 @@ function Vehicles() {
     return (
         <div>
             {!isAdding && <button onClick={() => setIsAdding(true)}>Add Vehicle</button>}
-            {isAdding && <AddVehicle setIsAdding={setIsAdding} vehicles={vehicles} />}
+            {isAdding && <AddVehicle setIsAdding={setIsAdding} vehicles={vehicles} setVehicles={setVehicles}/>}
             <ListVehicle vehicles={vehicles} />
         </div>
     )

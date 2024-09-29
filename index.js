@@ -188,13 +188,13 @@ app.post('/vehicle', async (req, res) => {
     res.json({error: "vehicle already exists!"})
     return
   }
-  const vehicleRef = db.collection('vehicles').doc(req.body.id);
+  const vehicleRef = db.collection('vehicles').doc(req.body.id.toUpperCase());
 
   await vehicleRef.set({name: req.body.id, company: req.fm_user.bossOfCompanyId}, { merge: true });
 
   const snapshot = await vehicleRef.get()
 
-  res.json({newVehicle: snapshot.data()})
+  res.json(snapshot.data())
 
 })
 app.post('/user', async (req, res) => {
