@@ -121,10 +121,110 @@ function EditVehicle({ vehicle, setIsEditting }) {
     function handleSave() {
         setIsEditting(false)
     }
-    return <div>
-        <h3>Editting vehicle <button onClick={handleSave}>Save</button></h3>
-        <div>{vehicle.name}</div>
-    </div>
+
+    const [formData, setFormData] = useState({ odometer: 0, hubo: 0, ruc: 0, rego: '2000-01-01', cof: '2000-01-01', service: 0, location: '', ...vehicle });
+    useEffect(() => {
+        console.log('New state:', formData); // Logs new state after re-render
+    }, [formData]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        // You can handle form submission here, e.g., send data to an API or log it
+        console.log('Form submitted:', formData);
+        // Reset form after submission
+        setFormData({});
+    };
+    return <form onSubmit={handleSubmit}>
+        <h3>Editting <button onClick={handleSave}>Save</button></h3>
+        <div>
+            <label>Plate:</label>
+            <input
+                type="text"
+                name="name"
+                value={formData.name}
+                disabled
+            />
+        </div>
+        <div>
+            <label>Odometer:</label>
+            <input
+                type="number"
+                name="odometer"
+                value={formData.odometer}
+                onChange={handleChange}
+                required
+            />
+        </div>
+        <div>
+            <label>Hubdometer:</label>
+            <input
+                type="number"
+                name="hubo"
+                value={formData.hubo}
+                onChange={handleChange}
+                required
+            />
+        </div>
+        <div>
+            <label>RUC:</label>
+            <input
+                type="number"
+                name="ruc"
+                value={formData.ruc}
+                onChange={handleChange}
+                required
+            />
+        </div>
+        <div>
+            <label>Rego:</label>
+            <input
+                type="date"
+                name="rego"
+                value={formData.rego}
+                onChange={handleChange}
+                required
+            />
+        </div>
+        <div>
+            <label>Cof:</label>
+            <input
+                type="date"
+                name="cof"
+                value={formData.cof}
+                onChange={handleChange}
+                required
+            />
+        </div>
+        <div>
+            <label>Next Service:</label>
+            <input
+                type="number"
+                name="service"
+                value={formData.service}
+                onChange={handleChange}
+                required
+            />
+        </div>
+        <div>
+            <label>Location:</label>
+            <input
+                type="text"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                required
+            />
+        </div>
+        <button type="submit">Submit</button>
+    </form>
 }
 function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
     function handleEdit(vehicle) {
@@ -176,7 +276,7 @@ function Vehicles() {
     }, []); // Empty dependency array means this runs once on mount
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
-    if (isEditting) return <EditVehicle vehicle={vehicleIsEditing} setIsEditting={setIsEditting}/>
+    if (isEditting) return <EditVehicle vehicle={vehicleIsEditing} setIsEditting={setIsEditting} />
     return (
         <div>
             {!isAdding && <button onClick={() => setIsAdding(true)}>Add Vehicle</button>}
