@@ -117,10 +117,20 @@ function AddVehicle({ setIsAdding, vehicles, setVehicles }) {
         </form>
     </div>
 }
-function EditVehicle() {
-    return <div>Editting vehicle</div>
+function EditVehicle({ vehicle, setIsEditting }) {
+    function handleSave() {
+        setIsEditting(false)
+    }
+    return <div>
+        <h3>Editting vehicle <button onClick={handleSave}>Save</button></h3>
+        <div>{vehicle.name}</div>
+    </div>
 }
-function ListVehicle({ vehicles }) {
+function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
+    function handleEdit(vehicle) {
+        setIsEditting(true)
+        setVehicleIsEditing(vehicle)
+    }
     return <div><h2>Vehicle List</h2>
         {vehicles.length === 0 ? (
             <p>No vehicles added yet.</p>
@@ -129,7 +139,10 @@ function ListVehicle({ vehicles }) {
                 {vehicles.map((vehicle) => (
                     <li key={vehicle.name}>
                         {vehicle.name}
-                        <button onClick={() => handleEdit(vehicle)}>Edit</button>
+                        <button onClick={() => {
+                            setIsEditting(true);
+                            setVehicleIsEditing(vehicle)
+                        }}>Edit</button>
                     </li>
                 ))}
             </ul>
@@ -137,6 +150,7 @@ function ListVehicle({ vehicles }) {
 }
 function Vehicles() {
     const [isEditting, setIsEditting] = useState(false)
+    const [vehicleIsEditing, setVehicleIsEditing] = useState({})
     const [isAdding, setIsAdding] = useState(false)
     const [vehicles, setVehicles] = useState([])
     const [loading, setLoading] = useState(true);
@@ -162,11 +176,12 @@ function Vehicles() {
     }, []); // Empty dependency array means this runs once on mount
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
+    if (isEditting) return <EditVehicle vehicle={vehicleIsEditing} setIsEditting={setIsEditting}/>
     return (
         <div>
             {!isAdding && <button onClick={() => setIsAdding(true)}>Add Vehicle</button>}
-            {isAdding && <AddVehicle setIsAdding={setIsAdding} vehicles={vehicles} setVehicles={setVehicles}/>}
-            <ListVehicle vehicles={vehicles} />
+            {isAdding && <AddVehicle setIsAdding={setIsAdding} vehicles={vehicles} setVehicles={setVehicles} />}
+            <ListVehicle {...{ vehicles, setVehicleIsEditing, setIsEditting }} />
         </div>
     )
 }
