@@ -117,7 +117,7 @@ function AddVehicle({ setIsAdding, vehicles, setVehicles }) {
         </form>
     </div>
 }
-function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles}) {
+function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles }) {
 
     const [formData, setFormData] = useState({ odometer: 0, hubo: 0, ruc: 0, rego: '2000-01-01', cof: '2000-01-01', service: 0, location: '', ...vehicle });
     const [error, setError] = useState(null)
@@ -137,10 +137,10 @@ function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles}) {
     const handleSubmit = (e) => {
         e.preventDefault();
         // You can handle form submission here, e.g., send data to an API or log it
-        let v = {...formData}
+        let v = { ...formData }
         delete v.company
         delete v.name
-        axios.put('/vehicle', {id: vehicle.name, vehicle: v}).then((res)=> {
+        axios.put('/vehicle', { id: vehicle.name, vehicle: v }).then((res) => {
             if ('error' in res.data) {
                 // setError(res.data.error)
             } else {
@@ -294,7 +294,7 @@ function Vehicles() {
     }, []); // Empty dependency array means this runs once on mount
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
-    if (isEditting) return <EditVehicle vehicle={vehicleIsEditing} setIsEditting={setIsEditting} setVehicles={setVehicles} vehicles={vehicles}/>
+    if (isEditting) return <EditVehicle vehicle={vehicleIsEditing} setIsEditting={setIsEditting} setVehicles={setVehicles} vehicles={vehicles} />
     return (
         <div>
             {!isAdding && <button onClick={() => setIsAdding(true)}>Add Vehicle</button>}
@@ -365,18 +365,69 @@ function BossPage() {
         </div>
     );
 }
-function DriverPage() {
-    return <div>Driver Page</div>
+function VehicleCapsule({vehicle}) {
+    return <div>{vehicle.name} Use me :)</div>
+}
+function DriverPage({ user }) {
+    const [inputText, setInputText] = useState('')
+    useEffect(()=>{
+        console.log(inputText)
+    }, [inputText])
+    let vehicles
+    let vehicleIds
+    const handleChange= (e) => {
+        setInputText(e.target.value.toUpperCase())
+        setShowCapsule(e.target.value.toUpperCase() in vehicleIds)
+    }
+    const [showCapsule, setShowCapsule] = useState(false)
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchVehicles = async () => {
+            try {
+                const response = await axios.get('/vehicles'); // Replace with your API endpoint
+                if ('error' in response.data) {
+                    setError(response.data.error)
+                } else {
+                    vehicles = (response.data);
+                    vehicleIds = vehicles.map(v=>v.name)
+                    console.log('vehicleids', vehicleIds)
+                }
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchVehicles();
+    }, []); // Empty dependency array means this runs once on mount
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
+    return <Fragment>
+        <div>Hi {user.name}, type in vehicle number</div>
+        <div><input type='text' onChange={handleChange} value={inputText} /></div>
+        {showCapsule && <VehicleCapsule vehicle={vehicles.find(v=>v.name==inputText)}/>}
+    </Fragment>
+
 }
 function App({ data }) {
-    let {user, companies} = data
+    let { user, companies } = data
     let isBoss = user.isBoss
     let [showManagePage, setPage] = useState(isBoss)
 
     return (
         <Fragment>
             <button onClick={() => setPage(!showManagePage)}>{showManagePage ? 'login as Driver' : 'Manage fleet'}</button>
-            {showManagePage ? <BossPage /> : ( ('company' in user && 'status' in user.company && user.company.status==1) ? <DriverPage /> :<InstructionPage user={user} companies={companies} />)}
+            {showManagePage ?
+                <BossPage />
+                :
+                (('company' in user && 'status' in user.company && user.company.status == 1) ?
+                    <DriverPage {...{ user }} />
+                    :
+                    <InstructionPage user={user} companies={companies} />)
+            }
         </Fragment>
     )
 }

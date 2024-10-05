@@ -98,7 +98,7 @@ app.use(async (req, res, next) => {
       }
     }
     user.isBoss = isBoss
-    user.bossOfCompanyId = bossOfCompanyId
+    if (isBoss) user.bossOfCompanyId = bossOfCompanyId
     req.fm_user = user
     next()
   }
