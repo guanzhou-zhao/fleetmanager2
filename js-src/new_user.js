@@ -373,11 +373,11 @@ function DriverPage({ user }) {
     useEffect(()=>{
         console.log(inputText)
     }, [inputText])
-    let vehicles
-    let vehicleIds
+    const [ vehicles, setVehicles] = useState([])
+    const[ vehicleIds, setVehicleIds] = useState([])
     const handleChange= (e) => {
         setInputText(e.target.value.toUpperCase())
-        setShowCapsule(e.target.value.toUpperCase() in vehicleIds)
+        setShowCapsule(vehicleIds.includes(e.target.value.toUpperCase()))
     }
     const [showCapsule, setShowCapsule] = useState(false)
     const [loading, setLoading] = useState(true);
@@ -390,9 +390,8 @@ function DriverPage({ user }) {
                 if ('error' in response.data) {
                     setError(response.data.error)
                 } else {
-                    vehicles = (response.data);
-                    vehicleIds = vehicles.map(v=>v.name)
-                    console.log('vehicleids', vehicleIds)
+                    setVehicles(response.data);
+                    setVehicleIds(response.data.map(v=>v.name))
                 }
             } catch (err) {
                 setError(err.message);
