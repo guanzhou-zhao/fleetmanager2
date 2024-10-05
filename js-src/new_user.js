@@ -365,14 +365,18 @@ function BossPage() {
         </div>
     );
 }
+function DriverPage() {
+    return <div>Driver Page</div>
+}
 function App({ data }) {
-    let isBoss = data.user.isBoss
+    let {user, companies} = data
+    let isBoss = user.isBoss
     let [showManagePage, setPage] = useState(isBoss)
 
     return (
         <Fragment>
             <button onClick={() => setPage(!showManagePage)}>{showManagePage ? 'login as Driver' : 'Manage fleet'}</button>
-            {showManagePage ? <BossPage /> : <InstructionPage user={data.user} companies={data.companies} />}
+            {showManagePage ? <BossPage /> : ( ('company' in user && 'status' in user.company && user.company.status==1) ? <DriverPage /> :<InstructionPage user={user} companies={companies} />)}
         </Fragment>
     )
 }
