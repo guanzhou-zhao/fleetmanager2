@@ -182,6 +182,16 @@ app.get('/vehicles', async (req, res) => {
   const vehicles = vehiclesSnapshot.docs.map(v=>v.data())
   res.json(vehicles)
 })
+app.put('/vehicle', async (req, res) => {
+  if ('id' in req.body && 'vehicle' in req.body) {
+    const vehicleRef = db.collection('vehicles').doc(req.body.id)
+    await vehicleRef.set(req.body.vehicle, { merge: true });
+    const snapshot = await vehicleRef.get()
+    res.json(snapshot.data())
+  } else {
+    res.json({error: 'bad request, not enough data provided'})
+  }
+})
 app.post('/vehicle', async (req, res) => {
   const vehicles = await cash.getVehicles();
   if (vehicles.includes(req.body.id)) {

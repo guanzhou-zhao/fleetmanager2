@@ -117,15 +117,10 @@ function AddVehicle({ setIsAdding, vehicles, setVehicles }) {
         </form>
     </div>
 }
-function EditVehicle({ vehicle, setIsEditting }) {
-    function handleSave() {
-        setIsEditting(false)
-    }
+function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles}) {
 
     const [formData, setFormData] = useState({ odometer: 0, hubo: 0, ruc: 0, rego: '2000-01-01', cof: '2000-01-01', service: 0, location: '', ...vehicle });
-    useEffect(() => {
-        console.log('New state:', formData); // Logs new state after re-render
-    }, [formData]);
+    const [error, setError] = useState(null)
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -134,16 +129,39 @@ function EditVehicle({ vehicle, setIsEditting }) {
             [name]: value
         });
     };
-
+    const handleCancel = (e) => {
+        setIsEditting(false)
+        setFormData({})
+        setError(null)
+    }
     const handleSubmit = (e) => {
         e.preventDefault();
         // You can handle form submission here, e.g., send data to an API or log it
-        console.log('Form submitted:', formData);
-        // Reset form after submission
-        setFormData({});
+        let v = {...formData}
+        delete v.company
+        delete v.name
+        axios.put('/vehicle', {id: vehicle.name, vehicle: v}).then((res)=> {
+            if ('error' in res.data) {
+                // setError(res.data.error)
+            } else {
+                setVehicles(vehicles.map((v) => {
+                    if (v.name == res.data.name) {
+                        return res.data
+                    } else {
+                        return v
+                    }
+                }))
+                setIsEditting(false)
+                // Reset form after submission
+                setFormData({});
+            }
+        }).catch((err) => {
+            setError(err.message)
+        })
     };
     return <form onSubmit={handleSubmit}>
-        <h3>Editting <button onClick={handleSave}>Save</button></h3>
+        <h3>Editting <button onClick={handleCancel}>Cancel</button></h3>
+        {error && <div>{error}</div>}
         <div>
             <label>Plate:</label>
             <input
@@ -276,7 +294,7 @@ function Vehicles() {
     }, []); // Empty dependency array means this runs once on mount
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
-    if (isEditting) return <EditVehicle vehicle={vehicleIsEditing} setIsEditting={setIsEditting} />
+    if (isEditting) return <EditVehicle vehicle={vehicleIsEditing} setIsEditting={setIsEditting} setVehicles={setVehicles} vehicles={vehicles}/>
     return (
         <div>
             {!isAdding && <button onClick={() => setIsAdding(true)}>Add Vehicle</button>}
@@ -316,7 +334,6 @@ function BossPage() {
 
     function toggleApprove(item) {
         return function () {
-            console.log(item)
             axios.post('/setJoinCompanyStatus', { sub: item.sub, data: { company: { status: item.company.status == 0 ? 1 : 0 } } })
                 .then((res) => {
                     if ('error' in res.data) {
