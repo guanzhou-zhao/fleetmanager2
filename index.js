@@ -87,6 +87,9 @@ app.use(async (req, res, next) => {
   if ('error' in user) {
     res.json({ user })
   } else {
+    let userSnapshot = await db.collection('users').doc(user.sub).get()
+    let userInDB = userSnapshot.data()
+    user = {...userInDB, ...user}
     let companies = await cash.getCompanies();
     let isBoss = false
     let bossOfCompanyId
