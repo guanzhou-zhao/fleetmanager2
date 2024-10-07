@@ -55,6 +55,7 @@ app.use(cookieParser())
 app.use(express.static('public'))
 //validate user and set user in req
 app.use(async (req, res, next) => {
+  if (req.path == '/') return next()
   let hasError = false, errorString, user = { error: 'authenticate error' }
   if (req.cookies && req.cookies.token) {
 
@@ -86,6 +87,7 @@ app.use(async (req, res, next) => {
   }
   if ('error' in user) {
     res.json({ user })
+    return
   } else {
     let userSnapshot = await db.collection('users').doc(user.sub).get()
     let userInDB = userSnapshot.data()
