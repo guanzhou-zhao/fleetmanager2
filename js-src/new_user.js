@@ -241,7 +241,7 @@ function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles }) {
                 required
             />
         </div>
-        <button type="submit">Submit</button>
+        <button type="submit">Update</button>
     </form>
 }
 function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
@@ -365,8 +365,14 @@ function BossPage() {
         </div>
     );
 }
-function VehicleCapsule({vehicle}) {
-    return <div>{vehicle.name} Use me :)</div>
+function VehicleCapsule({vehicle, vehicles, setVehicles}) {
+    const [isEditting, setIsEditting] = useState(false)
+    const handleShowDetails = () => {
+
+    }
+    return <div>{vehicle.name} <button onClick={()=>{setIsEditting(true)}}>details</button>
+        { isEditting && <EditVehicle {...{vehicle, vehicles, setVehicles, setIsEditting}}/>}
+    </div>
 }
 function DriverPage({ user }) {
     const [inputText, setInputText] = useState('')
@@ -407,7 +413,7 @@ function DriverPage({ user }) {
     return <Fragment>
         <div>Hi {user.name}, type in vehicle number</div>
         <div><input type='text' onChange={handleChange} value={inputText} /></div>
-        {showCapsule && <VehicleCapsule vehicle={vehicles.find(v=>v.name==inputText)}/>}
+        {showCapsule && <VehicleCapsule vehicle={vehicles.find(v=>v.name==inputText)} {...{vehicles, setVehicles}}/> }
     </Fragment>
 
 }
