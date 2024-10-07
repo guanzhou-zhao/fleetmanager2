@@ -303,6 +303,86 @@ function Vehicles() {
         </div>
     )
 }
+function AlertSetting() {
+    const [formData, setFormData] = useState({ rego: 30, ruc: 1000, cof: 30, service: 1000});
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState(null)
+    const [successful, setSuccessful] = useState(false)
+    useEffect(()=> {
+        (async ()=> {
+            let user = (await axios.get('/user')).data
+            if ('alertSetting' in user) {
+                setFormData({...formData, ...user.alertSetting})
+            }
+        })()
+        setIsLoading(false)
+    }, [successful])
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        });
+    };
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        // You can handle form submission here, e.g., send data to an API or log it
+
+        axios.put('/user', { alertSetting: formData }).then((res) => {
+            setFormData(res.data.alertSetting)
+            setSuccessful(true)
+            setTimeout(() => setSuccessful(false), 2000)
+        }).catch((err) => {
+            setError(err.message)
+        })
+    };
+    if (isLoading) return <div>Loading</div>
+    if (error) return <div>Something goes wrong</div>
+    return <form onSubmit={handleSubmit}>
+        {successful && <div>saved successfully</div>}
+        <div>
+            <label>Rego (days to alert):</label>
+            <input
+                type="number"
+                name="rego"
+                value={formData.rego}
+                onChange={handleChange}
+                required
+            />
+        </div>
+        <div>
+            <label>ruc (kms to alert):</label>
+            <input
+                type="number"
+                name="ruc"
+                value={formData.ruc}
+                onChange={handleChange}
+                required
+            />
+        </div>
+        <div>
+            <label>Cof (days to alert):</label>
+            <input
+                type="number"
+                name="cof"
+                value={formData.cof}
+                onChange={handleChange}
+                required
+            />
+        </div>
+        <div>
+            <label>Service (kms to alert):</label>
+            <input
+                type="number"
+                name="service"
+                value={formData.service}
+                onChange={handleChange}
+                required
+            />
+        </div>
+        <button type="submit">Save</button>
+    </form>
+}
 function BossPage() {
 
     const [users, setUsers] = useState([]);
@@ -354,6 +434,7 @@ function BossPage() {
         <div>
             <h4 onClick={() => setActivePage('users')}>Users</h4>
             <h4 onClick={() => setActivePage('vehicles')}>Vehicles</h4>
+            <h4 onClick={() => setActivePage('alertSetting')}>Alert Setting</h4>
             {activePage == 'users' && <ul>
                 {users.map(item => (
                     <li key={item.sub}>{item.name} {item.email} <button onClick={toggleApprove(item)}>{item.company.status == 0 ? 'approve' : 'remove'}</button></li> // Adjust according to your data structure
@@ -362,6 +443,7 @@ function BossPage() {
             {activePage == 'vehicles' && (
                 <Vehicles />
             )}
+            {activePage == 'alertSetting' && <AlertSetting />}
         </div>
     );
 }

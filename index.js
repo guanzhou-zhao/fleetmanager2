@@ -231,6 +231,22 @@ app.post('/user', async (req, res) => {
     companies: companyIds
   })
 })
+app.get('/user', async (req, res) => {
+  const userSnapshot= await db.collection('users').doc(req.fm_user.sub).get()
+  res.json(userSnapshot.data())
+})
+app.put('/user', async (req, res) => {
+  let user = req.fm_user
+  const userRef = db.collection('users').doc(user.sub)
+  if (Object.keys(req.body).length === 0) {
+    
+  } else {
+    userRef.set(req.body, {merge: true})
+    
+  }
+  const userSnapshot = await userRef.get()
+  res.json(userSnapshot.data())
+})
 
 const PORT = process.env.PORT || 8443
 if (process.env.PORT) {
