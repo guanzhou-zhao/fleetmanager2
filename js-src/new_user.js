@@ -416,9 +416,12 @@ function AlertSetting() {
     const [successful, setSuccessful] = useState(false)
     useEffect(() => {
         (async () => {
-            let user = (await axios.get('/user')).data
-            if ('alertSetting' in user) {
-                setFormData({ ...formData, ...user.alertSetting })
+            let company = (await axios.put('/company')).data
+            if ('error' in company) {
+                setError('company code not definded')
+            }
+            if ('alertSetting' in company) {
+                setFormData({ ...formData, ...company.alertSetting })
             }
         })()
         setIsLoading(false)
@@ -434,7 +437,7 @@ function AlertSetting() {
         e.preventDefault();
         // You can handle form submission here, e.g., send data to an API or log it
 
-        axios.put('/user', { alertSetting: formData }).then((res) => {
+        axios.put('/company', { alertSetting: formData }).then((res) => {
             setFormData(res.data.alertSetting)
             setSuccessful(true)
             setTimeout(() => setSuccessful(false), 2000)

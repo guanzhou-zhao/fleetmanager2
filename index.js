@@ -212,6 +212,26 @@ app.post('/vehicle', async (req, res) => {
   res.json(snapshot.data())
 
 })
+app.put('/company', async (req, res) => {
+  let user = req.fm_user
+  let companyId = ''
+  if('bossOfCompanyId' in user) {
+    companyId = user.bossOfCompanyId
+  } else if('company' in user && 'name' in user.company) {
+    companyId = user.company.name
+  } else {
+    return res.json({error: 'no company id'})
+  }
+  const companyRef = db.collection('companies').doc(companyId)
+  if (Object.keys(req.body).length === 0) {
+    
+  } else {
+    await companyRef.set(req.body, {merge: true})
+    
+  }
+  const companySnapshot = await companyRef.get()
+  res.json(companySnapshot.data())
+})
 app.post('/user', async (req, res) => {
 
   let user = req.fm_user, userJson
@@ -241,7 +261,7 @@ app.put('/user', async (req, res) => {
   if (Object.keys(req.body).length === 0) {
     
   } else {
-    userRef.set(req.body, {merge: true})
+    await userRef.set(req.body, {merge: true})
     
   }
   const userSnapshot = await userRef.get()
