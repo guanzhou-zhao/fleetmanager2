@@ -245,9 +245,70 @@ function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles }) {
     </form>
 }
 function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
+    const [alertSetting, setAlertSetting] = useState({ rego: 30, ruc: 1000, cof: 30, service: 1000 })
     function handleEdit(vehicle) {
         setIsEditting(true)
         setVehicleIsEditing(vehicle)
+    }
+    useEffect(() => {
+        (async () => {
+            let user = (await axios.get('/user')).data
+            if ('alertSetting' in user) {
+                setAlertSetting(user.alertSetting)
+            }
+        })()
+    }, [])
+    function needsAlert(vehicle, alertSetting) {
+        let needsAlert = false
+        let alertLevel = 0
+        let alertInfo = []
+        //odometer: 0, hubo: 0, ruc: 0, rego: '2000-01-01', cof: '2000-01-01', service: 0, location: '', ...vehicle
+        if ('odometer' in vehicle) {
+            if ('service' in vehicle) {
+                let serviceLeft = vehicle.service - vehicle.odometer
+                if (serviceLeft <=100) {
+                    needsAlert = true
+                    alertLevel = 2
+                    alertInfo.push('Service: < 100kms')
+                } else if (serviceLeft <= alertSetting.service) {
+                    needsAlert = true
+                    alertLevel = alertLevel==2 ? 2 : 1
+                    alertInfo.push(`Service: < ${alertSetting.service}kms`)
+                }
+            } else {
+                alertInfo.push('service is not recorded')
+                needsAlert = true
+                alertLevel = 2
+            }
+        } else {
+            alertInfo.push('odometer is not recorded')
+            needsAlert = true
+            alertLevel = 2
+        }
+        if ('hubo' in vehicle) {
+            if ('ruc' in vehicle) {
+                let rucLeft = vehicle.ruc - vehicle.hubo
+                if (rucLeft <=100) {
+                    needsAlert = true
+                    alertLevel = 2
+                    alertInfo.push('RUC: < 100kms')
+                } else if (rucLeft <= alertSetting.ruc) {
+                    needsAlert = true
+                    alertLevel = alertLevel==2 ? 2 : 1
+                    alertInfo.push(`RUC: < ${alertSetting.service}kms`)
+                }
+            } else {
+                alertInfo.push('ruc is not recorded')
+                needsAlert = true
+                alertLevel = 2
+            }
+        } else {
+            alertInfo.push('hubo is not recorded')
+            needsAlert = true
+            alertLevel = 2
+        }
+        let borderColor = needsAlert ? (alertLevel==1? 'orange-border':'red-border') : ''
+        return [needsAlert, alertLevel, alertInfo, borderColor]
     }
     return <div><h2>Vehicle List</h2>
         {vehicles.length === 0 ? (
@@ -255,12 +316,12 @@ function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
         ) : (
             <ul>
                 {vehicles.map((vehicle) => (
-                    <li key={vehicle.name}>
+                    <li key={vehicle.name} className={needsAlert(vehicle, alertSetting)[3]}>
                         {vehicle.name}
                         <button onClick={() => {
                             setIsEditting(true);
                             setVehicleIsEditing(vehicle)
-                        }}>Edit</button>
+                        }}>Edit</button><div>{needsAlert(vehicle, alertSetting)[2].map((a, i)=><div key={i}>{a}</div>)}</div>
                     </li>
                 ))}
             </ul>
@@ -304,15 +365,15 @@ function Vehicles() {
     )
 }
 function AlertSetting() {
-    const [formData, setFormData] = useState({ rego: 30, ruc: 1000, cof: 30, service: 1000});
+    const [formData, setFormData] = useState({ rego: 30, ruc: 1000, cof: 30, service: 1000 });
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState(null)
     const [successful, setSuccessful] = useState(false)
-    useEffect(()=> {
-        (async ()=> {
+    useEffect(() => {
+        (async () => {
             let user = (await axios.get('/user')).data
             if ('alertSetting' in user) {
-                setFormData({...formData, ...user.alertSetting})
+                setFormData({ ...formData, ...user.alertSetting })
             }
         })()
         setIsLoading(false)
@@ -447,23 +508,23 @@ function BossPage() {
         </div>
     );
 }
-function VehicleCapsule({vehicle, vehicles, setVehicles}) {
+function VehicleCapsule({ vehicle, vehicles, setVehicles }) {
     const [isEditting, setIsEditting] = useState(false)
     const handleShowDetails = () => {
 
     }
-    return <div>{vehicle.name} <button onClick={()=>{setIsEditting(true)}}>details</button>
-        { isEditting && <EditVehicle {...{vehicle, vehicles, setVehicles, setIsEditting}}/>}
+    return <div>{vehicle.name} <button onClick={() => { setIsEditting(true) }}>details</button>
+        {isEditting && <EditVehicle {...{ vehicle, vehicles, setVehicles, setIsEditting }} />}
     </div>
 }
 function DriverPage({ user }) {
     const [inputText, setInputText] = useState('')
-    useEffect(()=>{
+    useEffect(() => {
         console.log(inputText)
     }, [inputText])
-    const [ vehicles, setVehicles] = useState([])
-    const[ vehicleIds, setVehicleIds] = useState([])
-    const handleChange= (e) => {
+    const [vehicles, setVehicles] = useState([])
+    const [vehicleIds, setVehicleIds] = useState([])
+    const handleChange = (e) => {
         setInputText(e.target.value.toUpperCase())
         setShowCapsule(vehicleIds.includes(e.target.value.toUpperCase()))
     }
@@ -479,7 +540,7 @@ function DriverPage({ user }) {
                     setError(response.data.error)
                 } else {
                     setVehicles(response.data);
-                    setVehicleIds(response.data.map(v=>v.name))
+                    setVehicleIds(response.data.map(v => v.name))
                 }
             } catch (err) {
                 setError(err.message);
@@ -495,7 +556,7 @@ function DriverPage({ user }) {
     return <Fragment>
         <div>Hi {user.name}, type in vehicle number</div>
         <div><input type='text' onChange={handleChange} value={inputText} /></div>
-        {showCapsule && <VehicleCapsule vehicle={vehicles.find(v=>v.name==inputText)} {...{vehicles, setVehicles}}/> }
+        {showCapsule && <VehicleCapsule vehicle={vehicles.find(v => v.name == inputText)} {...{ vehicles, setVehicles }} />}
     </Fragment>
 
 }

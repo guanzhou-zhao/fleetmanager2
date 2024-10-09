@@ -56,3 +56,9 @@ nav {
     display: flex;
     margin-right: 2rem;
   }
+  .red-border {
+    border: 2px red solid;
+  }
+  .orange-border {
+    border: 2px orange solid;
+  }

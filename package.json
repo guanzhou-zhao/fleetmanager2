@@ -15,6 +15,7 @@
     "babel-cli": "^6.26.0",
     "babel-preset-react-app": "^3.1.2",
     "body-parser": "^1.20.2",
+    "classnames": "^2.5.1",
     "cookie-parser": "^1.4.6",
     "express": "^4.19.2",
     "google-auth-library": "^9.13.0",
