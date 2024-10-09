@@ -244,6 +244,7 @@ function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles }) {
         <button type="submit">Update</button>
     </form>
 }
+
 function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
     const [alertSetting, setAlertSetting] = useState({ rego: 30, ruc: 1000, cof: 30, service: 1000 })
     function handleEdit(vehicle) {
@@ -258,6 +259,18 @@ function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
             }
         })()
     }, [])
+    function getDaysDifference(date) {
+        const date1 = new Date();
+        const date2 = new Date(date)
+        date1.setHours(0, 0, 0, 0);
+        // Convert both dates to milliseconds
+        const timeDiff = date2.getTime() - date1.getTime();
+
+        // Convert milliseconds to days (1 day = 24 hours * 60 minutes * 60 seconds * 1000 milliseconds)
+        const dayDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+        return dayDiff;
+    }
     function needsAlert(vehicle, alertSetting) {
         let needsAlert = false
         let alertLevel = 0
@@ -266,13 +279,13 @@ function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
         if ('odometer' in vehicle) {
             if ('service' in vehicle) {
                 let serviceLeft = vehicle.service - vehicle.odometer
-                if (serviceLeft <=100) {
+                if (serviceLeft <= 100) {
                     needsAlert = true
                     alertLevel = 2
                     alertInfo.push('Service: < 100kms')
                 } else if (serviceLeft <= alertSetting.service) {
                     needsAlert = true
-                    alertLevel = alertLevel==2 ? 2 : 1
+                    alertLevel = alertLevel == 2 ? 2 : 1
                     alertInfo.push(`Service: < ${alertSetting.service}kms`)
                 }
             } else {
@@ -288,13 +301,13 @@ function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
         if ('hubo' in vehicle) {
             if ('ruc' in vehicle) {
                 let rucLeft = vehicle.ruc - vehicle.hubo
-                if (rucLeft <=100) {
+                if (rucLeft <= 100) {
                     needsAlert = true
                     alertLevel = 2
                     alertInfo.push('RUC: < 100kms')
                 } else if (rucLeft <= alertSetting.ruc) {
                     needsAlert = true
-                    alertLevel = alertLevel==2 ? 2 : 1
+                    alertLevel = alertLevel == 2 ? 2 : 1
                     alertInfo.push(`RUC: < ${alertSetting.service}kms`)
                 }
             } else {
@@ -307,7 +320,39 @@ function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
             needsAlert = true
             alertLevel = 2
         }
-        let borderColor = needsAlert ? (alertLevel==1? 'orange-border':'red-border') : ''
+        if ('cof' in vehicle) {
+            let cofLeft = getDaysDifference(vehicle.cof)
+            if (cofLeft <= 10) {
+                needsAlert = true
+                alertLevel = 2
+                alertInfo.push('COF: < 10days')
+            } else if (cofLeft <= alertSetting.cof) {
+                needsAlert = true
+                alertLevel = alertLevel == 2 ? 2 : 1
+                alertInfo.push(`COF: < ${alertSetting.cof}days`)
+            }
+        } else {
+            alertInfo.push('COF is not recorded')
+            needsAlert = true
+            alertLevel = 2
+        }
+        if ('rego' in vehicle) {
+            let regoLeft = getDaysDifference(vehicle.rego)
+            if (regoLeft <= 10) {
+                needsAlert = true
+                alertLevel = 2
+                alertInfo.push('Rego: < 10days')
+            } else if (regoLeft <= alertSetting.rego) {
+                needsAlert = true
+                alertLevel = alertLevel == 2 ? 2 : 1
+                alertInfo.push(`Rego: < ${alertSetting.rego}days`)
+            }
+        } else {
+            alertInfo.push('Rego is not recorded')
+            needsAlert = true
+            alertLevel = 2
+        }
+        let borderColor = needsAlert ? (alertLevel == 1 ? 'orange-border' : 'red-border') : ''
         return [needsAlert, alertLevel, alertInfo, borderColor]
     }
     return <div><h2>Vehicle List</h2>
@@ -321,7 +366,7 @@ function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
                         <button onClick={() => {
                             setIsEditting(true);
                             setVehicleIsEditing(vehicle)
-                        }}>Edit</button><div>{needsAlert(vehicle, alertSetting)[2].map((a, i)=><div key={i}>{a}</div>)}</div>
+                        }}>Edit</button><div>{needsAlert(vehicle, alertSetting)[2].map((a, i) => <div key={i}>{a}</div>)}</div>
                     </li>
                 ))}
             </ul>
