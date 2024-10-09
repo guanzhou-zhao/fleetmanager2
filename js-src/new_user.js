@@ -349,9 +349,9 @@ function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
     }
     useEffect(() => {
         (async () => {
-            let user = (await axios.get('/user')).data
-            if ('alertSetting' in user) {
-                setAlertSetting(user.alertSetting)
+            let company = (await axios.put('/company')).data
+            if ('alertSetting' in company) {
+                setAlertSetting(company.alertSetting)
             }
         })()
     }, [])
