@@ -182,6 +182,16 @@ function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles }) {
             />
         </div>
         <div>
+            <label>Next Service:</label>
+            <input
+                type="number"
+                name="service"
+                value={formData.service}
+                onChange={handleChange}
+                required
+            />
+        </div>
+        <div>
             <label>Hubdometer:</label>
             <input
                 type="number"
@@ -217,16 +227,6 @@ function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles }) {
                 type="date"
                 name="cof"
                 value={formData.cof}
-                onChange={handleChange}
-                required
-            />
-        </div>
-        <div>
-            <label>Next Service:</label>
-            <input
-                type="number"
-                name="service"
-                value={formData.service}
                 onChange={handleChange}
                 required
             />
