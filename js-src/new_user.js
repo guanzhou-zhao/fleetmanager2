@@ -558,10 +558,21 @@ function BossPage() {
 }
 function VehicleCapsule({ vehicle, vehicles, setVehicles }) {
     const [isEditting, setIsEditting] = useState(false)
-    const handleShowDetails = () => {
+    const [isLoading, setIsLoading] = useState(true)
+    // [needsAlert, alertLevel, alertInfo, borderColor]
+    const [alertInfo, setAlertInfo] = useState([false, 0, [], ''])
 
-    }
-    return <div>{vehicle.name} <button onClick={() => { setIsEditting(true) }}>details</button>
+    useEffect(() => {
+        (async () => {
+            let company = (await axios.put('/company')).data
+            let alertSetting = 'alertSetting' in company ? company.alertSetting : { rego: 30, ruc: 1000, cof: 30, service: 1000 }
+            setAlertInfo(needsAlert(vehicle, alertSetting))
+        })()
+        setIsLoading(false)
+    }, [])
+    if (isLoading) return <div>Loading...</div>
+    return <div className={alertInfo[3]}>{vehicle.name} <button onClick={() => { setIsEditting(true) }}>details</button>
+        {alertInfo[0] && <div>{alertInfo[2].map((a, i) => <div key={i}>{a}</div>)}</div>}
         {isEditting && <EditVehicle {...{ vehicle, vehicles, setVehicles, setIsEditting }} />}
     </div>
 }
