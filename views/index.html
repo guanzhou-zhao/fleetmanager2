@@ -8,23 +8,10 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://accounts.google.com/gsi/client" async></script>
     <script src="https://unpkg.com/axios@1.6.7/dist/axios.min.js"></script>
-    <script src="script.js"></script>
-    <script>
-        let fm_user, fm_companies
-    </script>
+
 </head>
 
 <body>
-
-    <style>
-
-    </style>
-    <div id="login-with-google" class="flex items-center justify-center min-h-screen">
-        <div id="google_btn"></div>
-    </div>
-    <div id="main">
-
-    </div>
     <div id="root"></div>
     <!-- Load React. -->
     <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
@@ -33,77 +20,6 @@
 
     <!-- Load our React component. -->
     <script src="new_user.js"></script>
-    <script>
-        function promptGoogleLogin() {
-            google.accounts.id.initialize({
-                client_id: '859003465245-0e19el21rsofb768u8icerklp5o8np6r.apps.googleusercontent.com',
-                callback: handleCredentialResponse
-            });
-            const parent = document.getElementById('google_btn');
-            google.accounts.id.renderButton(parent, { theme: "filled_blue" });
-            google.accounts.id.prompt();
-        }
-        function getUser(token) {
-            axios.post('/user', { token })
-                .then((res) => {
-                    if (res.data.user && 'error' in res.data.user) {
-                        promptGoogleLogin()
-                    } else {
-                        // hide google login button 
-                        document.getElementById('google_btn').innerHTML=""
-                        // user is google authenticated
-                        // show user name and company if already in company
-                        // res.data {user, companies}
-                        renderRoot(res.data)
-                    }
-                }).catch((err) => {
-                    console.log(err)
-                })
-        }
-        let companies
-        window.onload = function () { // get google token
-            let token = getCookie("token");
-            if (token && token != "") {
-                // fm_user = decodeJwtResponse(token);
-
-                getUser(token)
-
-            } else {
-                promptGoogleLogin()
-            }
-          
-        }
-    </script>
-    <script>
-
-        function handleCredentialResponse(response) {// got google token 
-            setCookie('token', response.credential, 365)
-            // decode user from token returned from google
-            // fm_user = decodeJwtResponse(response.credential)
-            // get user infomation from db 
-            getUser(response.credential)
-            // and show user name and company if already in company
-        }
-    </script>
-    <script>
-        // function signOut() {
-        //     const auth2 = gapi.auth2.getAuthInstance();
-        //     auth2.signOut().then(function () {
-        //         console.log('User signed out.');
-        //     });
-        // }
-        // function printUser() {
-        //     if (auth2.isSignedIn.get()) {
-        //         var profile = auth2.currentUser.get().getBasicProfile();
-        //         console.log('ID: ' + profile.getId());
-        //         console.log('Full Name: ' + profile.getName());
-        //         console.log('Given Name: ' + profile.getGivenName());
-        //         console.log('Family Name: ' + profile.getFamilyName());
-        //         console.log('Image URL: ' + profile.getImageUrl());
-        //         console.log('Email: ' + profile.getEmail());
-        //     }
-        // }
-    </script>
 </body>
 
 </html>

@@ -638,8 +638,79 @@ function App({ data }) {
         </Fragment>
     )
 }
-function renderRoot(data) {
+function setCookie(cname, cvalue, exdays) {
+    const d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    let expires = "expires=" + d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+    let name = cname + "=";
+    let ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+function decodeJwtResponse(token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+}
+
+function LoginPage({setNeedsReload}) {
+    const handleCredentialResponse = (response) => {
+        setCookie('token', response.credential, 365)
+        setNeedsReload(true)
+    };
+
+    useEffect(()=> {
+        google.accounts.id.initialize({
+            client_id: '859003465245-0e19el21rsofb768u8icerklp5o8np6r.apps.googleusercontent.com',
+            callback: handleCredentialResponse
+        });
+        const parent = document.getElementById('google_btn');
+        google.accounts.id.renderButton(parent, { theme: "filled_blue" });
+        google.accounts.id.prompt();
+    }, [])
+    return <div id="login-with-google" className="flex items-center justify-center min-h-screen">
+        <div id="google_btn"></div>
+    </div>
+}
+function LoginOrApp() {
+    const [isGoogleLoggedIn, setIsGoogleLoggedIn] = useState(false)
+    const [needsReload, setNeedsReload] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+    const [data, setData] = useState({})
+    useEffect(() => {
+        (async () => {
+            setIsLoading(true)
+            const res = await axios.post('/user')
+            if ('user' in res.data && 'error' in res.data.user) {
+                // google not logged in as default
+            } else {
+                !isGoogleLoggedIn && setIsGoogleLoggedIn(true)
+                setData(res.data)
+            }
+            setIsLoading(false)
+        })()
+    }, [needsReload])
+    if(isLoading) return <div>loading...</div>
+    return isGoogleLoggedIn ? <App data={data} /> : <LoginPage {...{setNeedsReload}}/>
+}
+(function renderRoot() {
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App data={data} />);
-}
+    root.render(<LoginOrApp />);
+})()
