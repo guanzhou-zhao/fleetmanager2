@@ -12,9 +12,9 @@ function GreetingHeader({ user }) {
 }
 function Instruction({ user }) {
     let instructions = [
-        'Type in company code to join the company.',
+        'Enter company code to join the company.',
         'Application of joining company has been sent. Please contact your boss to approve.',
-        'type in vehicle registration number to start using the vehicle.'
+        'Enter vehicle registration number to start using the vehicle.'
     ]
     let instructionIndex = 0
     if ('company' in user) {
@@ -541,6 +541,7 @@ function BossPage() {
     }
     return (
         <div>
+            <h3>Feet Management Backend System</h3>
             <h4 onClick={() => setActivePage('users')}>Users</h4>
             <h4 onClick={() => setActivePage('vehicles')}>Vehicles</h4>
             <h4 onClick={() => setActivePage('alertSetting')}>Alert Setting</h4>
@@ -613,7 +614,7 @@ function DriverPage({ user }) {
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
     return <Fragment>
-        <div>Hi {user.name}, type in vehicle number</div>
+        <div>Hi {user.name}, enter vehicle number</div>
         <div><input type='text' onChange={handleChange} value={inputText} /></div>
         {showCapsule && <VehicleCapsule vehicle={vehicles.find(v => v.name == inputText)} {...{ vehicles, setVehicles }} />}
     </Fragment>
@@ -621,12 +622,15 @@ function DriverPage({ user }) {
 }
 function App({ data }) {
     let { user, companies } = data
-    let isBoss = user.isBoss
-    let [showManagePage, setPage] = useState(isBoss)
+    // let [isBoss, setIsBoss] = useState(user.isBoss)
+    let [showManagePage, setPage] = useState(user.isBoss)
 
     return (
-        <Fragment>
-            <button onClick={() => setPage(!showManagePage)}>{showManagePage ? 'login as Driver' : 'Manage fleet'}</button>
+        <div>
+            {user.isBoss && <div className="fixed flex bottom-0 w-full">
+            <button className={`w-1/2 bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white ${!showManagePage && 'text-black bg-white'} shadow-sm `} onClick={() => setPage(false)}>login as Driver</button>
+            <button className={`w-1/2 bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white ${showManagePage && 'text-black bg-white'} shadow-sm `} onClick={() => setPage(true)}>Manage fleet</button>
+            </div>}
             {showManagePage ?
                 <BossPage />
                 :
@@ -635,7 +639,7 @@ function App({ data }) {
                     :
                     <InstructionPage user={user} companies={companies} />)
             }
-        </Fragment>
+        </div>
     )
 }
 function setCookie(cname, cvalue, exdays) {
