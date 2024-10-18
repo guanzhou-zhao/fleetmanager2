@@ -541,10 +541,14 @@ function BossPage() {
     }
     return (
         <div>
-            <h3>Feet Management Backend System</h3>
-            <h4 onClick={() => setActivePage('users')}>Users</h4>
-            <h4 onClick={() => setActivePage('vehicles')}>Vehicles</h4>
-            <h4 onClick={() => setActivePage('alertSetting')}>Alert Setting</h4>
+            <div className="text-center">
+                <h3 className="inline-block mx-auto my-4 bg-blue-400 p-4 rounded-md text-white">Feet Management Backend System</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+                <h4 className={`bg-blue-400 p-3 text-center text-white ${activePage== 'users' && " bg-white text-black"}`} onClick={() => setActivePage('users')}>Users</h4>
+                <h4 className={`bg-blue-400 p-3 text-center text-white ${activePage== 'vehicles' && " bg-white text-black"}`} onClick={() => setActivePage('vehicles')}>Vehicles</h4>
+                <h4 className={`bg-blue-400 p-3 text-center text-white ${activePage== 'alertSetting' && " bg-white text-black"}`} onClick={() => setActivePage('alertSetting')}>Alert Setting</h4>
+            </div>
             {activePage == 'users' && <ul>
                 {users.map(item => (
                     <li key={item.sub}>{item.name} {item.email} <button onClick={toggleApprove(item)}>{item.company.status == 0 ? 'approve' : 'remove'}</button></li> // Adjust according to your data structure
@@ -613,11 +617,12 @@ function DriverPage({ user }) {
     }, []); // Empty dependency array means this runs once on mount
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
-    return <Fragment>
-        <div>Hi {user.name}, enter vehicle number</div>
+    return <div className="flex flex-column">
+        <div className="bg-blue-200 rounded">Hi {user.name},</div>
+        <div>enter vehicle number</div>
         <div><input type='text' onChange={handleChange} value={inputText} /></div>
         {showCapsule && <VehicleCapsule vehicle={vehicles.find(v => v.name == inputText)} {...{ vehicles, setVehicles }} />}
-    </Fragment>
+    </div>
 
 }
 function App({ data }) {
@@ -628,8 +633,8 @@ function App({ data }) {
     return (
         <div>
             {user.isBoss && <div className="fixed flex bottom-0 w-full">
-            <button className={`w-1/2 bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white ${!showManagePage && 'text-black bg-white'} shadow-sm `} onClick={() => setPage(false)}>login as Driver</button>
-            <button className={`w-1/2 bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white ${showManagePage && 'text-black bg-white'} shadow-sm `} onClick={() => setPage(true)}>Manage fleet</button>
+                <button className={`w-1/2 bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white ${!showManagePage && 'text-black bg-white'} shadow-sm `} onClick={() => setPage(false)}>login as Driver</button>
+                <button className={`w-1/2 bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white ${showManagePage && 'text-black bg-white'} shadow-sm `} onClick={() => setPage(true)}>Manage fleet</button>
             </div>}
             {showManagePage ?
                 <BossPage />
@@ -673,13 +678,13 @@ function decodeJwtResponse(token) {
     return JSON.parse(jsonPayload);
 }
 
-function LoginPage({setNeedsReload}) {
+function LoginPage({ setNeedsReload }) {
     const handleCredentialResponse = (response) => {
         setCookie('token', response.credential, 365)
         setNeedsReload(true)
     };
 
-    useEffect(()=> {
+    useEffect(() => {
         google.accounts.id.initialize({
             client_id: '859003465245-0e19el21rsofb768u8icerklp5o8np6r.apps.googleusercontent.com',
             callback: handleCredentialResponse
@@ -710,8 +715,8 @@ function LoginOrApp() {
             setIsLoading(false)
         })()
     }, [needsReload])
-    if(isLoading) return <div>loading...</div>
-    return isGoogleLoggedIn ? <App data={data} /> : <LoginPage {...{setNeedsReload}}/>
+    if (isLoading) return <div>loading...</div>
+    return isGoogleLoggedIn ? <App data={data} /> : <LoginPage {...{ setNeedsReload }} />
 }
 (function renderRoot() {
 
