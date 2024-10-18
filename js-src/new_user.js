@@ -544,14 +544,14 @@ function BossPage() {
             <div className="text-center">
                 <h3 className="inline-block mx-auto my-4 bg-blue-400 p-4 rounded-md text-white">Feet Management Backend System</h3>
             </div>
-            <div className="grid grid-cols-3 gap-2">
-                <h4 className={`bg-blue-400 p-3 text-center text-white ${activePage== 'users' && " bg-white text-black"}`} onClick={() => setActivePage('users')}>Users</h4>
-                <h4 className={`bg-blue-400 p-3 text-center text-white ${activePage== 'vehicles' && " bg-white text-black"}`} onClick={() => setActivePage('vehicles')}>Vehicles</h4>
-                <h4 className={`bg-blue-400 p-3 text-center text-white ${activePage== 'alertSetting' && " bg-white text-black"}`} onClick={() => setActivePage('alertSetting')}>Alert Setting</h4>
+            <div className="grid grid-cols-3">
+                <h4 className={`p-3 text-center ${activePage== 'users' ? " bg-white text-black border-t-4 border-blue-400" : "bg-blue-400 text-white"}`} onClick={() => setActivePage('users')}>Users</h4>
+                <h4 className={`p-3 text-center ${activePage== 'vehicles' ? " bg-white text-black border-t-4 border-blue-400" : "bg-blue-400 text-white"}`} onClick={() => setActivePage('vehicles')}>Vehicles</h4>
+                <h4 className={`p-3 text-center ${activePage== 'alertSetting' ? " bg-white text-black border-t-4 border-blue-400" : "bg-blue-400 text-white"}`} onClick={() => setActivePage('alertSetting')}>Alert Setting</h4>
             </div>
             {activePage == 'users' && <ul>
                 {users.map(item => (
-                    <li key={item.sub}>{item.name} {item.email} <button onClick={toggleApprove(item)}>{item.company.status == 0 ? 'approve' : 'remove'}</button></li> // Adjust according to your data structure
+                    <li className=" flex justify-between align-center bg-slate-200 m-2 p-2" key={item.sub}><div className=" flex items-center">{item.name} {item.email}</div><button className={`inline-block mr-0 w-max h-max rounded p-2 text-white ${item.company.status == 0 ? "bg-green-600":"bg-red-600"}`} onClick={toggleApprove(item)}>{item.company.status == 0 ? 'approve' : 'remove'}</button></li> // Adjust according to your data structure
                 ))}
             </ul>}
             {activePage == 'vehicles' && (
