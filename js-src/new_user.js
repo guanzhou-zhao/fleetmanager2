@@ -70,9 +70,10 @@ function InstructionPage({ user: userProp, companies }) {
         </div>
     )
 }
-function AddVehicle({ setIsAdding, vehicles, setVehicles }) {
+function AddVehicle({ vehicles, setVehicles }) {
     const [id, setId] = useState('')
     const [error, setError] = useState(null)
+    const [isAdding, setIsAdding] = useState(false)
     function handleSubmit(e) {
         e.preventDefault();
         // You can handle form submission here, e.g., send data to an API or log it
@@ -100,12 +101,15 @@ function AddVehicle({ setIsAdding, vehicles, setVehicles }) {
         if (vehicles.map(v => v.name.toUpperCase()).includes(e.target.value.toUpperCase())) { setError('number has been used') }
         else { setError(null) }
     }
-    return <div>
-        <button onClick={() => setIsAdding(false)}>Cancel</button>
+    if (!isAdding) return <div className="m-2">
+        <button className="bg-blue-400 py-2 px-3 rounded text-white" onClick={() => setIsAdding(true)}>Add Vehicle</button>
+    </div>
+    if (isAdding) return <div className="relative m-2 p-3 bg-blue-400 text-white">
+        <button className="absolute top-0 right-0 bg-red-600 p-2 rounded" onClick={() => setIsAdding(false)}>Cancel</button>
         <form onSubmit={handleSubmit}>
-            <div>
+            <div className="flex flex-col">
                 <label>Registration Number:</label>
-                <input
+                <input className="input"
                     type="text"
                     name="id"
                     value={id}
@@ -113,7 +117,7 @@ function AddVehicle({ setIsAdding, vehicles, setVehicles }) {
                     required
                 />{error && <div>number used!</div>}
             </div>
-            <button type="submit" disabled={vehicles.map(v => v.name.toUpperCase()).includes(id)}>Submit</button>
+            <button className="mt-4 bg-green-600 p-2 rounded" type="submit" disabled={vehicles.map(v => v.name.toUpperCase()).includes(id)}>Submit</button>
         </form>
     </div>
 }
@@ -355,13 +359,13 @@ function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
             }
         })()
     }, [])
-    return <div><h2>Vehicle List</h2>
+    return <div className="px-2"><h2>Vehicle List</h2>
         {vehicles.length === 0 ? (
             <p>No vehicles added yet.</p>
         ) : (
             <ul>
                 {vehicles.map((vehicle) => (
-                    <li key={vehicle.name} className={needsAlert(vehicle, alertSetting)[3]}>
+                    <li key={vehicle.name} className={`${needsAlert(vehicle, alertSetting)[3]} my-2`}>
                         {vehicle.name}
                         <button onClick={() => {
                             setIsEditting(true);
@@ -375,7 +379,6 @@ function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
 function Vehicles() {
     const [isEditting, setIsEditting] = useState(false)
     const [vehicleIsEditing, setVehicleIsEditing] = useState({})
-    const [isAdding, setIsAdding] = useState(false)
     const [vehicles, setVehicles] = useState([])
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -403,8 +406,7 @@ function Vehicles() {
     if (isEditting) return <EditVehicle vehicle={vehicleIsEditing} setIsEditting={setIsEditting} setVehicles={setVehicles} vehicles={vehicles} />
     return (
         <div>
-            {!isAdding && <button onClick={() => setIsAdding(true)}>Add Vehicle</button>}
-            {isAdding && <AddVehicle setIsAdding={setIsAdding} vehicles={vehicles} setVehicles={setVehicles} />}
+            <AddVehicle vehicles={vehicles} setVehicles={setVehicles} />
             <ListVehicle {...{ vehicles, setVehicleIsEditing, setIsEditting }} />
         </div>
     )
@@ -541,17 +543,14 @@ function BossPage() {
     }
     return (
         <div>
-            <div className="text-center">
-                <h3 className="inline-block mx-auto my-4 bg-blue-400 p-4 rounded-md text-white">Feet Management Backend System</h3>
-            </div>
-            <div className="grid grid-cols-3">
-                <h4 className={`p-3 text-center ${activePage== 'users' ? " bg-white text-black border-t-4 border-blue-400" : "bg-blue-400 text-white"}`} onClick={() => setActivePage('users')}>Users</h4>
-                <h4 className={`p-3 text-center ${activePage== 'vehicles' ? " bg-white text-black border-t-4 border-blue-400" : "bg-blue-400 text-white"}`} onClick={() => setActivePage('vehicles')}>Vehicles</h4>
-                <h4 className={`p-3 text-center ${activePage== 'alertSetting' ? " bg-white text-black border-t-4 border-blue-400" : "bg-blue-400 text-white"}`} onClick={() => setActivePage('alertSetting')}>Alert Setting</h4>
+            <div className="grid grid-cols-3 mt-1">
+                <h4 className={`p-3 text-center ${activePage == 'users' ? " bg-white text-black border-t-4 border-blue-400" : "bg-blue-400 text-white"}`} onClick={() => setActivePage('users')}>Users</h4>
+                <h4 className={`p-3 text-center ${activePage == 'vehicles' ? " bg-white text-black border-t-4 border-blue-400" : "bg-blue-400 text-white"}`} onClick={() => setActivePage('vehicles')}>Vehicles</h4>
+                <h4 className={`p-3 text-center ${activePage == 'alertSetting' ? " bg-white text-black border-t-4 border-blue-400" : "bg-blue-400 text-white"}`} onClick={() => setActivePage('alertSetting')}>Alert Setting</h4>
             </div>
             {activePage == 'users' && <ul>
                 {users.map(item => (
-                    <li className=" flex justify-between align-center bg-slate-200 m-2 p-2" key={item.sub}><div className=" flex items-center">{item.name} {item.email}</div><button className={`inline-block mr-0 w-max h-max rounded p-2 text-white ${item.company.status == 0 ? "bg-green-600":"bg-red-600"}`} onClick={toggleApprove(item)}>{item.company.status == 0 ? 'approve' : 'remove'}</button></li> // Adjust according to your data structure
+                    <li className=" flex justify-between align-center bg-slate-200 m-2 p-2" key={item.sub}><div className=" flex items-center">{item.name} {item.email}</div><button className={`inline-block mr-0 w-max h-max rounded p-2 text-white ${item.company.status == 0 ? "bg-green-600" : "bg-red-600"}`} onClick={toggleApprove(item)}>{item.company.status == 0 ? 'approve' : 'remove'}</button></li> // Adjust according to your data structure
                 ))}
             </ul>}
             {activePage == 'vehicles' && (
