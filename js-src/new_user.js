@@ -105,7 +105,7 @@ function AddVehicle({ vehicles, setVehicles }) {
         <button className="bg-blue-400 py-2 px-3 rounded text-white" onClick={() => setIsAdding(true)}>Add Vehicle</button>
     </div>
     if (isAdding) return <div className="relative m-2 p-3 bg-blue-400 text-white">
-        <button className="absolute top-0 right-0 bg-red-600 p-2 rounded" onClick={() => setIsAdding(false)}>Cancel</button>
+        <button className="absolute top-0 right-0 bg-red-600 px-2 rounded" onClick={() => setIsAdding(false)}>Cancel</button>
         <form onSubmit={handleSubmit}>
             <div className="flex flex-col">
                 <label>Registration Number:</label>
@@ -359,15 +359,15 @@ function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
             }
         })()
     }, [])
-    return <div className="px-2"><h2>Vehicle List</h2>
+    return <div className="px-2">
         {vehicles.length === 0 ? (
             <p>No vehicles added yet.</p>
         ) : (
             <ul>
                 {vehicles.map((vehicle) => (
-                    <li key={vehicle.name} className={`${needsAlert(vehicle, alertSetting)[3]} my-2`}>
-                        {vehicle.name}
-                        <button onClick={() => {
+                    <li key={vehicle.name} className={`${needsAlert(vehicle, alertSetting)[3]} block my-2 relative`}>
+                        <div>{vehicle.name}</div>
+                        <button className="absolute text-white top-0 right-0 p-2 m-2 bg-green-600 rounded" onClick={() => {
                             setIsEditting(true);
                             setVehicleIsEditing(vehicle)
                         }}>Edit</button><div>{needsAlert(vehicle, alertSetting)[2].map((a, i) => <div key={i}>{a}</div>)}</div>
@@ -632,8 +632,8 @@ function App({ data }) {
     return (
         <div>
             {user.isBoss && <div className="fixed flex bottom-0 w-full">
-                <button className={`w-1/2 bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white ${!showManagePage && 'text-black bg-white'} shadow-sm `} onClick={() => setPage(false)}>login as Driver</button>
-                <button className={`w-1/2 bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white ${showManagePage && 'text-black bg-white'} shadow-sm `} onClick={() => setPage(true)}>Manage fleet</button>
+                <button className={`w-1/2 px-3 py-1.5 text-sm font-semibold leading-6 ${!showManagePage ? 'text-black bg-white' : 'bg-indigo-600 text-white'} shadow-sm `} onClick={() => setPage(false)}>login as Driver</button>
+                <button className={`w-1/2 px-3 py-1.5 text-sm font-semibold leading-6 ${showManagePage ? 'text-black bg-white' : 'bg-indigo-600 text-white'} shadow-sm `} onClick={() => setPage(true)}>Manage fleet</button>
             </div>}
             {showManagePage ?
                 <BossPage />
