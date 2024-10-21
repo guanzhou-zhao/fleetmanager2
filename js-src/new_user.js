@@ -163,21 +163,21 @@ function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles }) {
             setError(err.message)
         })
     };
-    return <form onSubmit={handleSubmit}>
-        <h3>Editting <button onClick={handleCancel}>Cancel</button></h3>
+    return <form onSubmit={handleSubmit} className="relative m-2 p-3 bg-blue-400 text-white">
+        <h3>Editting <button className="absolute top-0 right-0 bg-red-600 px-2 rounded" onClick={handleCancel}>Cancel</button></h3>
         {error && <div>{error}</div>}
-        <div>
+        <div className="flex flex-col">
             <label>Plate:</label>
-            <input
+            <input className="input"
                 type="text"
                 name="name"
                 value={formData.name}
                 disabled
             />
         </div>
-        <div>
+        <div className="flex flex-col">
             <label>Odometer:</label>
-            <input
+            <input className="input"
                 type="number"
                 name="odometer"
                 value={formData.odometer}
@@ -185,9 +185,9 @@ function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles }) {
                 required
             />
         </div>
-        <div>
+        <div className="flex flex-col">
             <label>Next Service:</label>
-            <input
+            <input className="input"
                 type="number"
                 name="service"
                 value={formData.service}
@@ -195,9 +195,9 @@ function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles }) {
                 required
             />
         </div>
-        <div>
+        <div className="flex flex-col">
             <label>Hubdometer:</label>
-            <input
+            <input className="input"
                 type="number"
                 name="hubo"
                 value={formData.hubo}
@@ -205,9 +205,9 @@ function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles }) {
                 required
             />
         </div>
-        <div>
+        <div className="flex flex-col">
             <label>RUC:</label>
-            <input
+            <input className="input"
                 type="number"
                 name="ruc"
                 value={formData.ruc}
@@ -215,9 +215,9 @@ function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles }) {
                 required
             />
         </div>
-        <div>
+        <div className="flex flex-col">
             <label>Rego:</label>
-            <input
+            <input className="input"
                 type="date"
                 name="rego"
                 value={formData.rego}
@@ -225,9 +225,9 @@ function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles }) {
                 required
             />
         </div>
-        <div>
+        <div className="flex flex-col">
             <label>Cof:</label>
-            <input
+            <input className="input"
                 type="date"
                 name="cof"
                 value={formData.cof}
@@ -235,9 +235,9 @@ function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles }) {
                 required
             />
         </div>
-        <div>
+        <div className="flex flex-col">
             <label>Location:</label>
-            <input
+            <input className="input"
                 type="text"
                 name="location"
                 value={formData.location}
@@ -245,7 +245,7 @@ function EditVehicle({ vehicle, setIsEditting, vehicles, setVehicles }) {
                 required
             />
         </div>
-        <button type="submit">Update</button>
+        <button className="mt-4 bg-green-600 p-2 rounded" type="submit">Update</button>
     </form>
 }
 
