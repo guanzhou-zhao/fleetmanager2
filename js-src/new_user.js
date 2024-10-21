@@ -365,8 +365,8 @@ function ListVehicle({ vehicles, setVehicleIsEditing, setIsEditting }) {
         ) : (
             <ul>
                 {vehicles.map((vehicle) => (
-                    <li key={vehicle.name} className={`${needsAlert(vehicle, alertSetting)[3]} block my-2 relative`}>
-                        <div>{vehicle.name}</div>
+                    <li key={vehicle.name} className={`${needsAlert(vehicle, alertSetting)[3]} block my-2 p-2 relative`}>
+                        <div className="font-bold text-lg">{vehicle.name}</div>
                         <button className="absolute text-white top-0 right-0 p-2 m-2 bg-green-600 rounded" onClick={() => {
                             setIsEditting(true);
                             setVehicleIsEditing(vehicle)
@@ -449,11 +449,11 @@ function AlertSetting() {
     };
     if (isLoading) return <div>Loading</div>
     if (error) return <div>Something goes wrong</div>
-    return <form onSubmit={handleSubmit}>
+    return <form className="relative m-2 p-3 bg-blue-400 text-white" onSubmit={handleSubmit}>
         {successful && <div>saved successfully</div>}
-        <div>
+        <div className="flex flex-col">
             <label>Rego (days to alert):</label>
-            <input
+            <input className="input"
                 type="number"
                 name="rego"
                 value={formData.rego}
@@ -461,9 +461,9 @@ function AlertSetting() {
                 required
             />
         </div>
-        <div>
+        <div className="flex flex-col">
             <label>ruc (kms to alert):</label>
-            <input
+            <input className="input"
                 type="number"
                 name="ruc"
                 value={formData.ruc}
@@ -471,9 +471,9 @@ function AlertSetting() {
                 required
             />
         </div>
-        <div>
+        <div className="flex flex-col">
             <label>Cof (days to alert):</label>
-            <input
+            <input className="input"
                 type="number"
                 name="cof"
                 value={formData.cof}
@@ -481,9 +481,9 @@ function AlertSetting() {
                 required
             />
         </div>
-        <div>
+        <div className="flex flex-col">
             <label>Service (kms to alert):</label>
-            <input
+            <input className="input"
                 type="number"
                 name="service"
                 value={formData.service}
@@ -491,7 +491,7 @@ function AlertSetting() {
                 required
             />
         </div>
-        <button type="submit">Save</button>
+        <button className="mt-4 bg-green-600 p-2 rounded" type="submit">Save</button>
     </form>
 }
 function BossPage() {
@@ -575,7 +575,9 @@ function VehicleCapsule({ vehicle, vehicles, setVehicles }) {
         setIsLoading(false)
     }, [])
     if (isLoading) return <div>Loading...</div>
-    return <div className={alertInfo[3]}>{vehicle.name} <button onClick={() => { setIsEditting(true) }}>details</button>
+    return <div className={`${alertInfo[3]} p-2 relative`}>
+        <div className="font-bold text-lg">{vehicle.name}</div>
+        <button className="absolute text-white top-0 right-0 p-2 m-2 bg-green-600 rounded" onClick={() => { setIsEditting(true) }}>update</button>
         {alertInfo[0] && <div>{alertInfo[2].map((a, i) => <div key={i}>{a}</div>)}</div>}
         {isEditting && <EditVehicle {...{ vehicle, vehicles, setVehicles, setIsEditting }} />}
     </div>
@@ -616,10 +618,14 @@ function DriverPage({ user }) {
     }, []); // Empty dependency array means this runs once on mount
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
-    return <div className="flex flex-column">
-        <div className="bg-blue-200 rounded">Hi {user.name},</div>
-        <div>enter vehicle number</div>
-        <div><input type='text' onChange={handleChange} value={inputText} /></div>
+    return <div className={`flex flex-col min-h-screen`}>
+        <div className="bg-blue-200 rounded text-center py-4">Hi {user.name},</div>
+        <div className={`${!showCapsule && 'flex-1'} flex flex-col justify-center `}>
+            <div className="m-2 p-3 bg-blue-400 text-white">
+                <div className="text-center">enter vehicle number</div>
+                <div className="text-center"><input className="input" type='text' onChange={handleChange} value={inputText} /></div>
+            </div>
+        </div>
         {showCapsule && <VehicleCapsule vehicle={vehicles.find(v => v.name == inputText)} {...{ vehicles, setVehicles }} />}
     </div>
 
