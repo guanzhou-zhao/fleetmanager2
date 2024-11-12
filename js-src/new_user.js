@@ -622,7 +622,7 @@ function DriverPage({ user }) {
         <div className="bg-blue-200 rounded text-center py-4">Hi {user.name},</div>
         <div className={`${!showCapsule && 'flex-1'} flex flex-col justify-center `}>
             <div className="m-2 p-3 bg-blue-400 text-white">
-                <div className="text-center">enter vehicle number</div>
+                <div className="text-center">Enter vehicle number</div>
                 <div className="text-center"><input className="input" type='text' onChange={handleChange} value={inputText} /></div>
             </div>
         </div>
@@ -638,7 +638,7 @@ function App({ data }) {
     return (
         <div>
             {user.isBoss && <div className="fixed flex bottom-0 w-full">
-                <button className={`w-1/2 px-3 py-1.5 text-sm font-semibold leading-6 ${!showManagePage ? 'text-black bg-white' : 'bg-indigo-600 text-white'} shadow-sm `} onClick={() => setPage(false)}>login as Driver</button>
+                <button className={`w-1/2 px-3 py-1.5 text-sm font-semibold leading-6 ${!showManagePage ? 'text-black bg-white' : 'bg-indigo-600 text-white'} shadow-sm `} onClick={() => setPage(false)}>Login as Driver</button>
                 <button className={`w-1/2 px-3 py-1.5 text-sm font-semibold leading-6 ${showManagePage ? 'text-black bg-white' : 'bg-indigo-600 text-white'} shadow-sm `} onClick={() => setPage(true)}>Manage fleet</button>
             </div>}
             {showManagePage ?
